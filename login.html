@@ -274,7 +274,23 @@
             border: 1px solid #ffc2c2;
             color: #b12b2b;
             padding: 14px;
-            border-radius: 14px
+            border-radius: 14px;
+            text-align: center;
+        }
+
+        .password-container {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            font-size: 18px;
+            user-select: none;
         }
 
         .placeholder-img {
@@ -451,9 +467,15 @@
                     <form id="loginForm">
                         <div class="input-group"><label>البريد الإلكتروني</label><input type="email" id="email"
                                 required></div>
-                        <div class="input-group"><label>كلمة المرور</label><input type="password" id="password"
-                                required></div><button class="btn-main" style="width:100%;margin-top:20px">تسجيل
-                            الدخول</button>
+                        <div class="input-group">
+                            <label>كلمة المرور</label>
+                            <div class="password-container">
+                                <input type="password" id="password" required style="width: 100%;">
+                                <span class="toggle-password" id="togglePassword">👁️</span>
+                            </div>
+                        </div>
+                        <div id="loginError" class="error-message">البريد الإلكتروني أو كلمة المرور غير صحيحة</div>
+                        <button class="btn-main" style="width:100%;margin-top:20px">تسجيل الدخول</button>
                         <p style="margin-top:15px;text-align:center">ليس لديك حساب <a href="register.html"
                                 style="color:#d96b4c">إنشاء حساب</a></p>
                     </form>
@@ -540,16 +562,37 @@
 
     function toggleMenu() { var m = document.getElementById('mobileMenu'); if (m) { m.classList.toggle('active') } } function normalizeText(t) { return String(t || '').toLowerCase().replace(/أ|إ|آ/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي').trim() }</script>
     <script>
+        // تبديل رؤية كلمة المرور
+        document.getElementById('togglePassword').onclick = function() {
+            var passInput = document.getElementById('password');
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                this.innerHTML = '👁️‍🗨️';
+            } else {
+                passInput.type = 'password';
+                this.innerHTML = '👁️';
+            }
+        };
+
         loginForm.onsubmit = function (e) {
             e.preventDefault();
-            var user = {
-                fullName: email.value.split('@')[0],
-                email: email.value,
-                userType: email.value.includes('tailor') ? 'tailor' : 'buyer',
-                createdAt: new Date().toISOString()
-            };
-            localStorage.setItem("tailorhubUser", JSON.stringify(user));
-            location.href = user.userType === "tailor" ? "tailor-dashboard.html" : "my-account.html";
+            
+            var users = JSON.parse(localStorage.getItem("tailorhubUsers") || "[]");
+            var foundUser = users.find(u => u.email === email.value && u.password === password.value);
+            
+            if (foundUser) {
+                // إخفاء رسالة الخطأ إذا كانت ظاهرة
+                document.getElementById('loginError').style.display = 'none';
+                
+                // حفظ الجلسة الحالية
+                localStorage.setItem("tailorhubUser", JSON.stringify(foundUser));
+                
+                // التوجيه حسب نوع الحساب
+                location.href = foundUser.userType === "tailor" ? "tailor-dashboard.html" : "my-account.html";
+            } else {
+                // إظهار رسالة الخطأ
+                document.getElementById('loginError').style.display = 'block';
+            }
         }
     </script>
 </body>

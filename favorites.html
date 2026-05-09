@@ -725,8 +725,8 @@
                         <li><a href="booking.html">احجز موعد</a></li>
                         <li><a href="tracking.html">تتبع طلبي</a></li>
                         <li><a href="about.html">من نحن</a></li>
-                        <li><a href="contact.html" class="active">تواصل معنا</a></li>
-                        <li><a href="" id="accountLink">حسابي</a></li>
+                        <li><a href="contact.html">تواصل معنا</a></li>
+                        <li><a href="" id="accountLink" class="active">حسابي</a></li>
                     </ul>
 
 
@@ -844,7 +844,36 @@
     <script>
 
         function toggleMenu() { var m = document.getElementById('mobileMenu'); if (m) { m.classList.toggle('active') } } function normalizeText(t) { return String(t || '').toLowerCase().replace(/أ|إ|آ/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي').trim() }</script>
-    <script>var data = { yasmeen: ["اتيلية الياسمين", "مادبا", "فساتين السهرة والأعراس", "ي"], jordan: ["مخيطة الأردن", "إربد", "الثوب الأردني المطرز", "أ"], east: ["أناقة الشرق", "السلط", "قفاطين وأثواب تراثية", "ش"], yousef: ["دار يوسف للتفصيل", "عمان", "بدلات رجالية ومناسبات", "د"] }; var fav = JSON.parse(localStorage.getItem("favorites") || "[]"); if (fav.length === 0) { favGrid.innerHTML = "<div class=card>لا يوجد خياطون محفوظون بعد</div>" } fav.forEach(function (id) { var t = data[id]; if (t) favGrid.innerHTML += `<div class="card"><div class="placeholder-img">${t[3]}</div><h3>${t[0]}</h3><p>${t[1]}</p><p>${t[2]}</p><br><a class="btn-light" href="tailor-profile.html?tailor=${id}">عرض الملف</a></div>` })</script>
+    <script>
+        // جلب الخياطين المسجلين حديثاً
+        var tailorsList = JSON.parse(localStorage.getItem("tailorhubTailors") || "[]");
+        var allTailors = {};
+        tailorsList.forEach(t => {
+            allTailors[t.id] = t;
+        });
+
+        var fav = JSON.parse(localStorage.getItem("favorites") || "[]"); 
+        var grid = document.getElementById('favGrid');
+
+        if (fav.length === 0) { 
+            grid.innerHTML = "<div class='card' style='grid-column: 1/-1; text-align: center;'>لا يوجد خياطون محفوظون بعد</div>";
+        } else {
+            fav.forEach(function (id) { 
+                var t = allTailors[id]; 
+                if (t) {
+                    var avatarHTML = t.avatar ? `<img src="${t.avatar}" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">` : t.letter;
+                    grid.innerHTML += `
+                        <div class="card" style="text-align: center;">
+                            <div class="placeholder-img" style="margin-bottom: 15px; ${t.avatar ? 'background:none' : ''}">${avatarHTML}</div>
+                            <h3>${t.name}</h3>
+                            <p style="color: #666; font-size: 14px;">${t.city}</p>
+                            <p style="color: #d96b4c; font-size: 13px; margin-bottom: 15px;">${t.service}</p>
+                            <a class="btn-light" href="tailor-profile.html?tailor=${id}" style="display: block; width: 100%;">عرض الملف</a>
+                        </div>`;
+                }
+            });
+        }
+    </script>
 </body>
 
 </html>

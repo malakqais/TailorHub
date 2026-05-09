@@ -662,7 +662,97 @@
     </script>
     <script>function toggleMenu() { var m = document.getElementById('mobileMenu'); if (m) { m.classList.toggle('active') } } function normalizeText(t) { return String(t || '').toLowerCase().replace(/أ|إ|آ/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي').trim() }</script>
     <script>
-        var tailors = { yasmeen: { id: 'yasmeen', name: 'اتيلية الياسمين', city: 'مادبا', service: 'فساتين السهرة والأعراس', rate: 4.4, price: 35, letter: 'ي', bio: 'خبرة تزيد عن 20 عاما في تفصيل فساتين السهرة الراقية بلمسة عصرية.', services: [['تفصيل فساتين', '35'], ['تصاميم مخصصة', '45'], ['ملابس تقليدية', '55']] }, jordan: { id: 'jordan', name: 'مخيطة الأردن', city: 'إربد', service: 'الثوب الأردني المطرز', rate: 4.8, price: 60, letter: 'أ', bio: 'مختصة بالثوب الأردني المطرز والملابس التراثية الراقية.', services: [['ثوب أردني مطرز', '60'], ['تطريز يدوي', '40'], ['تعديلات', '20']] }, east: { id: 'east', name: 'أناقة الشرق', city: 'السلط', service: 'قفاطين وأثواب تراثية', rate: 4.9, price: 50, letter: 'ش', bio: 'تصاميم شرقية وتراثية تناسب المناسبات والأعراس.', services: [['قفطان', '50'], ['ثوب تراثي', '55'], ['تصميم خاص', '70']] }, yousef: { id: 'yousef', name: 'دار يوسف للتفصيل', city: 'عمان', service: 'بدلات رجالية ومناسبات', rate: 4.7, price: 55, letter: 'د', bio: 'تفصيل بدلات رجالية رسمية ومناسبات بجودة عالية.', services: [['بدلة رجالية', '55'], ['قميص رسمي', '25'], ['تعديلات', '15']] } }; var params = new URLSearchParams(location.search); var id = params.get('tailor') || 'yasmeen'; var t = tailors[id] || tailors.yasmeen; document.getElementById('profileName').innerHTML = t.name; document.getElementById('profileService').innerHTML = t.service; document.getElementById('profileLetter').innerHTML = t.letter; document.getElementById('rateBox').innerHTML = t.rate; document.getElementById('cityBox').innerHTML = t.city; document.getElementById('priceBox').innerHTML = t.price + ' د.أ'; document.getElementById('bioText').innerHTML = t.bio; document.getElementById('bookBtn').href = 'booking.html?tailor=' + t.id; document.getElementById('sideBook').href = 'booking.html?tailor=' + t.id; document.getElementById('orderBtn').href = 'custom-order.html?tailor=' + t.id; document.getElementById('sideOrder').href = 'custom-order.html?tailor=' + t.id; var list = document.getElementById('servicesList'); t.services.forEach(function (s) { list.innerHTML += `<div class="service-row"><span>${s[0]}</span><strong>${s[1]} د.أ</strong></div>` }); function saveFavorite() { var f = JSON.parse(localStorage.getItem('favorites') || '[]'); if (f.indexOf(t.id) === -1) f.push(t.id); localStorage.setItem('favorites', JSON.stringify(f)); document.getElementById('favBtn').innerHTML = 'تم الحفظ' }</script>
+        // جلب الخياطين المسجلين حديثاً
+        var tailorsList = JSON.parse(localStorage.getItem("tailorhubTailors") || "[]");
+        var tailors = {};
+        tailorsList.forEach(t => {
+            tailors[t.id] = t;
+        });
+
+        var params = new URLSearchParams(location.search); 
+        var id = params.get('tailor') || 'yasmeen'; 
+        var t = tailors[id] || tailors.yasmeen; 
+
+        document.getElementById('profileName').innerHTML = t.name; 
+        document.getElementById('profileService').innerHTML = t.service; 
+        
+        // عرض الصورة الشخصية إذا وجدت، وإلا عرض الحرف الأول
+        var avatarBox = document.getElementById('profileLetter');
+        if (t.avatar) {
+            avatarBox.innerHTML = `<img src="${t.avatar}" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">`;
+            avatarBox.style.background = "none";
+        } else {
+            avatarBox.innerHTML = t.letter; 
+        }
+
+        document.getElementById('rateBox').innerHTML = t.rate || 0; 
+        document.getElementById('cityBox').innerHTML = t.city; 
+        document.getElementById('priceBox').innerHTML = (t.price || 0) + ' د.أ'; 
+        document.getElementById('bioText').innerHTML = t.bio; 
+        
+        document.getElementById('bookBtn').href = 'booking.html?tailor=' + t.id; 
+        document.getElementById('sideBook').href = 'booking.html?tailor=' + t.id; 
+        document.getElementById('orderBtn').href = 'custom-order.html?tailor=' + t.id; 
+        document.getElementById('sideOrder').href = 'custom-order.html?tailor=' + t.id; 
+        
+        var list = document.getElementById('servicesList'); 
+        list.innerHTML = ""; // تنظيف القائمة قبل الإضافة
+        t.services.forEach(function (s) { 
+            list.innerHTML += `<div class="service-row"><span>${s[0]}</span><strong>${s[1]} د.أ</strong></div>` 
+        }); 
+
+        // تحديث معرض الأعمال
+        var galleryDiv = document.querySelector('.gallery');
+        galleryDiv.innerHTML = "";
+        if (t.gallery && t.gallery.length > 0) {
+            t.gallery.forEach(function(imgUrl, index) {
+                galleryDiv.innerHTML += `
+                    <div class="work-item" style="border-radius: 12px; overflow: hidden; height: 180px;">
+                        <img src="${imgUrl}" alt="عمل ${index + 1}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.parentElement.innerHTML='<div class=\'placeholder-img\' style=\'height:100%\'>صورة عمل</div>'">
+                    </div>
+                `;
+            });
+        } else {
+            // عرض عناصر نائبة إذا لم يكن هناك أعمال بعد
+            for(var i=1; i<=3; i++) {
+                galleryDiv.innerHTML += `<div class="placeholder-img" style="height: 130px;">عمل قادم ${i}</div>`;
+            }
+        }
+
+        // تهيئة زر المفضلة عند تحميل الصفحة
+        function initFavoriteBtn() {
+            var f = JSON.parse(localStorage.getItem('favorites') || '[]');
+            var btn = document.getElementById('favBtn');
+            if (f.indexOf(t.id) !== -1) {
+                btn.innerHTML = 'إزالة من المفضلة';
+                btn.style.background = '#f5e5dd';
+            } else {
+                btn.innerHTML = 'حفظ بالمفضلة';
+                btn.style.background = '';
+            }
+        }
+        initFavoriteBtn();
+
+        window.saveFavorite = function() { 
+            var f = JSON.parse(localStorage.getItem('favorites') || '[]'); 
+            var index = f.indexOf(t.id);
+            var btn = document.getElementById('favBtn');
+
+            if (index === -1) {
+                // حفظ
+                f.push(t.id);
+                btn.innerHTML = 'إزالة من المفضلة';
+                btn.style.background = '#f5e5dd';
+            } else {
+                // إزالة
+                f.splice(index, 1);
+                btn.innerHTML = 'حفظ بالمفضلة';
+                btn.style.background = '';
+            }
+            
+            localStorage.setItem('favorites', JSON.stringify(f)); 
+        }
+    </script>
 </body>
 
 </html>

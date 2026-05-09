@@ -511,15 +511,18 @@
                                         <p>PNG أو JPG حتى 5MB</p>
                                     </div>
                                 </div>
-                                <div class="input-group full"><label>المقاسات</label>
-                                    <div class="measurements"><input placeholder="محيط الصدر سم" id="chest"><input
-                                            placeholder="محيط الخصر سم" id="waist"><input placeholder="محيط الأرداف سم"
-                                            id="hips"><input placeholder="عرض الكتف سم" id="shoulder"><input
-                                            placeholder="طول الذراع سم" id="arm"><input placeholder="الطول الكلي سم"
-                                            id="length"></div>
+                                <div class="input-group full"><label>المقاسات (مطلوبة)</label>
+                                    <div class="measurements">
+                                        <input type="number" placeholder="محيط الصدر سم" id="chest" required>
+                                        <input type="number" placeholder="محيط الخصر سم" id="waist" required>
+                                        <input type="number" placeholder="محيط الأرداف سم" id="hips" required>
+                                        <input type="number" placeholder="عرض الكتف سم" id="shoulder" required>
+                                        <input type="number" placeholder="طول الذراع سم" id="arm" required>
+                                        <input type="number" placeholder="الطول الكلي سم" id="length" required>
+                                    </div>
                                 </div>
-                                <div class="input-group full"><label>ملاحظات إضافية</label><textarea id="notes"
-                                        placeholder="نوع القماش المفضل اللون الموعد المطلوب"></textarea></div>
+                                <div class="input-group full"><label>ملاحظات إضافية</label><textarea id="notes" required
+                                        placeholder="نوع القماش المفضل، اللون، الموعد المطلوب..."></textarea></div>
                             </div><button class="btn-main" style="width:100%;margin-top:25px">إرسال الطلب</button>
                             <div class="success-message" id="successMessage"></div>
                         </form>
@@ -619,85 +622,97 @@
     </script>
     <script>
 
-    var tailorNames = {
-        yasmeen: "اتيلية الياسمين",
-        jordan: "مخيطة الأردن",
-        east: "أناقة الشرق",
-        yousef: "دار يوسف للتفصيل"
-    };
+    var tailorSelect = document.getElementById('tailor');
+    var customTailorsList = JSON.parse(localStorage.getItem("tailorhubTailors") || "[]");
+    
+    // تنظيف الخيارات الحالية (باستثناء الخيار الأول) وإضافة الخياطين المسجلين
+    tailorSelect.innerHTML = '<option value="">اقتراح أنسب خياط</option>';
+    customTailorsList.forEach(t => {
+        var opt = document.createElement('option');
+        opt.value = t.id;
+        opt.text = t.name;
+        tailorSelect.appendChild(opt);
+    });
 
     var paramTailor = new URLSearchParams(location.search).get("tailor");
-
-    if (paramTailor && tailorNames[paramTailor]) {
-        tailor.value = paramTailor;
+    if (paramTailor) {
+        tailorSelect.value = paramTailor;
     }
+
+    var customForm = document.getElementById('customForm');
+    var successMessage = document.getElementById('successMessage');
+    var tailorSelect = document.getElementById('tailor');
 
     customForm.onsubmit = function (e) {
         e.preventDefault();
 
-        var selectedTailorId = tailor.value;
-        var selectedTailorName = tailor.options[tailor.selectedIndex].text;
+        var selectedTailorId = tailorSelect.value;
+        var selectedTailorName = tailorSelect.options[tailorSelect.selectedIndex].text;
 
         if (selectedTailorId === "") {
             successMessage.style.display = "block";
             successMessage.style.background = "#fff1f1";
             successMessage.style.border = "1px solid #ffc2c2";
             successMessage.style.color = "#b12b2b";
-            successMessage.innerHTML = "اختاري الخياط قبل إرسال الطلب";
+            successMessage.innerHTML = "يرجى اختيار الخياط قبل إرسال الطلب";
             return;
         }
 
-        var orders = JSON.parse(localStorage.getItem("tailorhubOrders") || "[]");
+        // جلب المستخدم الحالي لربط الطلب بحسابه
+        var user = JSON.parse(localStorage.getItem('tailorhubUser'));
+        var userEmail = user ? user.email : "guest";
 
+        var orders = JSON.parse(localStorage.getItem("tailorhubOrders") || "[]");
         var id = "TH-" + Date.now().toString().slice(-6);
 
         var newOrder = {
             id: id,
             type: "custom",
-
-            fullName: name.value.trim(),
-            phone: phone.value.trim(),
-            city: city.value,
+            userEmail: userEmail,
+            fullName: document.getElementById('name').value.trim(),
+            phone: document.getElementById('phone').value.trim(),
+            city: document.getElementById('city').value,
 
             tailorId: selectedTailorId,
             tailorName: selectedTailorName,
 
             service: "تصميم مخصص",
             price: "يحدد لاحقا",
-            date: "غير محدد",
-            time: "غير محدد",
+            date: new Date().toLocaleDateString("ar-JO"),
             status: "قيد المراجعة",
 
-            notes: notes.value,
+            notes: document.getElementById('notes').value,
 
             measurements: {
-                chest: chest.value,
-                waist: waist.value,
-                hips: hips.value,
-                shoulder: shoulder.value,
-                arm: arm.value,
-                length: length.value
+                chest: document.getElementById('chest').value,
+                waist: document.getElementById('waist').value,
+                hips: document.getElementById('hips').value,
+                shoulder: document.getElementById('shoulder').value,
+                arm: document.getElementById('arm').value,
+                length: document.getElementById('length').value
             },
 
             createdAt: new Date().toLocaleString("ar-JO")
         };
 
         orders.unshift(newOrder);
-
         localStorage.setItem("tailorhubOrders", JSON.stringify(orders));
 
         successMessage.style.display = "block";
         successMessage.style.background = "#eaf9ef";
         successMessage.style.border = "1px solid #b9e7c6";
         successMessage.style.color = "#23824c";
-        successMessage.innerHTML =
-            "تم إرسال الطلب بنجاح رقم " + id + " إلى " + selectedTailorName;
+        successMessage.innerHTML = "تم إرسال الطلب بنجاح رقم " + id + ". يمكنك تتبعه من لوحة التحكم.";
 
         customForm.reset();
 
+        // إعادة ضبط الخياط إذا كان مختاراً من الرابط
         if (paramTailor && tailorNames[paramTailor]) {
-            tailor.value = paramTailor;
+            tailorSelect.value = paramTailor;
         }
+        
+        // التمرير لأعلى لرؤية الرسالة
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 </script>
 </body>

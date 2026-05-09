@@ -277,6 +277,21 @@
             border-radius: 14px
         }
 
+        .password-container {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            font-size: 18px;
+            user-select: none;
+        }
+
         .placeholder-img {
             height: 190px;
             border-radius: 16px;
@@ -409,7 +424,7 @@
                     <li><a href="booking.html">احجز موعد</a></li>
                     <li><a href="tracking.html">تتبع طلبي</a></li>
                     <li><a href="about.html">من نحن</a></li>
-                    <li><a href="contact.html" class="active">تواصل معنا</a></li>
+                    <li><a href="contact.html">تواصل معنا</a></li>
                     <li><a href="" id="accountLink" >حسابي</a></li>
                 </ul>
 
@@ -453,13 +468,18 @@
                                     <option value="customer">عميل</option>
                                     <option value="tailor">خياط</option>
                                 </select></div>
-                            <div class="input-group"><label>الاسم الكامل</label><input id="name" required></div>
+                            <div class="input-group"><label>الاسم الكامل</label><input id="fullName" required></div>
                             <div class="input-group"><label>رقم الهاتف</label><input id="phone" required></div>
                             <div class="input-group"><label>البريد الإلكتروني</label><input type="email" id="email"
                                     required></div>
                             <div class="input-group"><label>المدينة</label><input id="city" required></div>
-                            <div class="input-group"><label>كلمة المرور</label><input type="password" id="password"
-                                    required></div>
+                            <div class="input-group">
+                                <label>كلمة المرور</label>
+                                <div class="password-container">
+                                    <input type="password" id="password" required style="width: 100%;">
+                                    <span class="toggle-password" id="togglePassword">👁️</span>
+                                </div>
+                            </div>
                         </div><button class="btn-main" style="width:100%;margin-top:24px">إنشاء الحساب</button>
                     </form>
                 </div>
@@ -524,7 +544,7 @@
     <script>
     window.onload = function() {
         // جلب بيانات المستخدم من localStorage
-        var userData = JSON.parse(localStorage.getItem('userData'));
+        var userData = JSON.parse(localStorage.getItem('tailorhubUser'));
 
         // إذا كانت بيانات المستخدم موجودة
         if (userData) {
@@ -549,17 +569,62 @@
 </script>
     <script>function toggleMenu() { var m = document.getElementById('mobileMenu'); if (m) { m.classList.toggle('active') } } function normalizeText(t) { return String(t || '').toLowerCase().replace(/أ|إ|آ/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي').trim() }</script>
     <script>
+        // تبديل رؤية كلمة المرور
+        document.getElementById('togglePassword').onclick = function() {
+            var passInput = document.getElementById('password');
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                this.innerHTML = '👁️‍🗨️';
+            } else {
+                passInput.type = 'password';
+                this.innerHTML = '👁️';
+            }
+        };
+
         registerForm.onsubmit = function (e) {
             e.preventDefault();
+            
+            var users = JSON.parse(localStorage.getItem("tailorhubUsers") || "[]");
+            
+            if (users.find(u => u.email === email.value)) {
+                alert("هذا البريد الإلكتروني مسجل بالفعل!");
+                return;
+            }
+
+            var userType = accountType.value === 'tailor' ? 'tailor' : 'buyer';
             var user = {
                 fullName: fullName.value,
                 email: email.value,
                 phone: phone.value,
                 city: city.value,
-                userType: accountType.value === 'tailor' ? 'tailor' : 'buyer',
-                bio: "",
+                password: password.value,
+                userType: userType,
+                bio: userType === 'tailor' ? "خياط محترف جديد في تيلورهب" : "مهتمة بتصميم الازياء والتفصيل",
                 createdAt: new Date().toISOString()
             };
+            
+            users.push(user);
+            localStorage.setItem("tailorhubUsers", JSON.stringify(users));
+            
+            // إذا كان المستخدم خياط، أضفه لقائمة الخياطين المعروضة
+            if (userType === 'tailor') {
+                var tailors = JSON.parse(localStorage.getItem("tailorhubTailors") || "[]");
+                var newTailor = {
+                    id: email.value.replace(/[^a-zA-Z0-9]/g, ''),
+                    email: email.value,
+                    name: fullName.value,
+                    city: city.value,
+                    service: "خياطة وتفصيل",
+                    rate: 0, // تقييم جديد
+                    price: 0,
+                    letter: fullName.value.charAt(0),
+                    bio: user.bio,
+                    services: [["خدمة عامة", "0"]]
+                };
+                tailors.push(newTailor);
+                localStorage.setItem("tailorhubTailors", JSON.stringify(tailors));
+            }
+            
             localStorage.setItem("tailorhubUser", JSON.stringify(user));
             location.href = user.userType === "tailor" ? "tailor-dashboard.html" : "my-account.html";
         }

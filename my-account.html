@@ -642,13 +642,32 @@
                 city.value = user.city || '';
                 bio.value = user.bio || '';
                 userNamePreview.innerHTML = user.fullName || 'مستخدم';
+                
+                // تحديث تاريخ الانضمام بشكل ديناميكي
+                var joinDate = new Date(user.createdAt || Date.now());
+                var joinYear = joinDate.getFullYear();
+                document.querySelector('.profile-box p').innerHTML = `عميلة منذ ${joinYear}`;
+                
+                // حرف الاسم الأول للأفاتار
+                document.querySelector('.avatar').innerHTML = user.fullName ? user.fullName.charAt(0) : 'ح';
             }
 
-            var orders = JSON.parse(localStorage.getItem('tailorhubOrders') || '[]').slice(0, 2);
+            var allOrders = JSON.parse(localStorage.getItem('tailorhubOrders') || '[]');
+            var userOrders = allOrders.filter(o => o.userEmail === user.email).slice(0, 4);
+            
             recentOrders.innerHTML = '';
-            orders.forEach(o => {
-                recentOrders.innerHTML += `<div class="order-card"><h4>${o.service}</h4><p>${o.tailorName || 'غير محدد'}</p><span class="status">${o.status}</span></div>`
-            });
+            if (userOrders.length === 0) {
+                recentOrders.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#888;">لا يوجد طلبات سابقة</p>';
+            } else {
+                userOrders.forEach(o => {
+                    recentOrders.innerHTML += `
+                        <div class="order-card">
+                            <h4>${o.service}</h4>
+                            <p>${o.tailorName || 'خياط'}</p>
+                            <span class="status">${o.status}</span>
+                        </div>`;
+                });
+            }
         }
 
         profileForm.onsubmit = function (e) {
@@ -661,6 +680,15 @@
             user.bio = bio.value;
 
             localStorage.setItem('tailorhubUser', JSON.stringify(user));
+            
+            // تحديث القائمة الكلية للمستخدمين أيضاً
+            var users = JSON.parse(localStorage.getItem("tailorhubUsers") || "[]");
+            var index = users.findIndex(u => u.email === user.email);
+            if (index !== -1) {
+                users[index] = user;
+                localStorage.setItem("tailorhubUsers", JSON.stringify(users));
+            }
+
             userNamePreview.innerHTML = fullName.value;
             successMessage.style.display = 'block';
             setTimeout(() => successMessage.style.display = 'none', 3000);

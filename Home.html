@@ -391,17 +391,19 @@
 
         .hero {
             min-height: 620px;
-            background: linear-gradient(rgba(255, 250, 246, .58), rgba(255, 250, 246, .94)), url("assets/tailor.png");
+            background: linear-gradient(rgba(255, 250, 246, 0), rgba(255, 250, 246, .94)), url("pics/machine.png");
             background-size: cover;
             background-position: center;
             display: flex;
             align-items: center;
-            text-align: center
+            text-align: center;
+
         }
 
         .hero-content {
             max-width: 850px;
-            margin: auto
+            margin: auto;
+
         }
 
         .hero-badge {
@@ -412,10 +414,12 @@
             border-radius: 25px;
             border: 1px solid #f0d8ce;
             margin-bottom: 20px;
-            font-size: 14px
+            font-size: 14px;
+
         }
 
         .hero h1 {
+            
             font-size: 52px;
             color: #171717;
             margin-bottom: 15px;
@@ -752,8 +756,7 @@
     </header>
     <main>
         <section class="hero">
-            <div class="container">
-                <div class="hero-content"><span class="hero-badge">منصة الخياطين الاولى في الاردن</span>
+            <div class="container">                <div class="hero-content"><span class="hero-badge">منصة الخياطين الاولى في الاردن</span>
                     <h1>اكتشف أمهر <span>الخياطين</span><br>في مدينتك</h1>
                     <p>تيلورهب يربطك بأفضل الخياطين الموثوقين بضغطة زر من فساتين الأعراس إلى البدلات الراقية والتصاميم
                         المخصصة</p>
@@ -951,7 +954,31 @@
     </script>
         <script>
 
-        var tailors = [{ id: 'yasmeen', name: 'اتيلية الياسمين', city: 'مادبا', service: 'فساتين السهرة والأعراس', rate: 4.4, price: 35, letter: 'ي' }, { id: 'jordan', name: 'مخيطة الأردن', city: 'إربد', service: 'الثوب الأردني المطرز', rate: 4.8, price: 60, letter: 'أ' }, { id: 'east', name: 'أناقة الشرق', city: 'السلط', service: 'قفاطين وأثواب تراثية', rate: 4.9, price: 50, letter: 'ش' }, { id: 'yousef', name: 'دار يوسف للتفصيل', city: 'عمان', service: 'بدلات رجالية ومناسبات', rate: 4.7, price: 55, letter: 'د' }]; function renderFeatured() { var box = document.getElementById('featuredTailors'); box.innerHTML = ''; tailors.forEach(function (t) { box.innerHTML += `<div class="tailor-card"><div class="tailor-img"><div class="placeholder-img">${t.letter}</div><span class="heart" onclick="toggleFavorite(event,'${t.id}',this)">${isFavorite(t.id) ? '♥' : '♡'}</span></div><div class="tailor-content"><h3>${t.name}</h3><p class="service">${t.service}</p><div class="tailor-info"><span>${t.city}</span><span>${t.rate} تقييم</span></div><p class="price">يبدأ من ${t.price} د.أ</p><a href="tailor-profile.html?tailor=${t.id}" class="card-btn">عرض الملف</a></div></div>` }) } function favs() { return JSON.parse(localStorage.getItem('favorites') || '[]') } function isFavorite(id) { return favs().indexOf(id) !== -1 } function toggleFavorite(e, id, el) { e.stopPropagation(); var f = favs(); if (f.indexOf(id) === -1) { f.push(id); el.innerHTML = '♥' } else { f = f.filter(x => x !== id); el.innerHTML = '♡' } localStorage.setItem('favorites', JSON.stringify(f)) } function searchTailor(event) { event.preventDefault(); var v = document.getElementById('searchInput').value.trim(); if (v === '') { document.getElementById('searchResult').innerHTML = 'اكتبي اسم الخياط او الخدمة او المدينة'; document.getElementById('searchResult').style.color = 'red'; return } window.location.href = 'tailors.html?search=' + encodeURIComponent(v) } function goService(s) { window.location.href = 'tailors.html?search=' + encodeURIComponent(s) } function goCity(c) { window.location.href = 'tailors.html?city=' + encodeURIComponent(c) } renderFeatured();
+        function renderFeatured() { 
+            var box = document.getElementById('featuredTailors'); 
+            box.innerHTML = ''; 
+            
+            var tailors = JSON.parse(localStorage.getItem("tailorhubTailors") || "[]").slice(0, 8);
+
+            if (tailors.length === 0) {
+                box.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:40px; color:#666;">لا يوجد خياطون متاحون حالياً. كن أول من ينضم إلينا!</p>';
+                return;
+            }
+
+            tailors.forEach(function (t) { 
+                var avatarHTML = t.avatar ? `<img src="${t.avatar}" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">` : t.letter;
+                box.innerHTML += `<div class="tailor-card"><div class="tailor-img"><div class="placeholder-img" style="${t.avatar ? 'background:none' : ''}">${avatarHTML}</div><span class="heart" onclick="toggleFavorite(event,'${t.id}',this)">${isFavorite(t.id) ? '♥' : '♡'}</span></div><div class="tailor-content"><h3>${t.name}</h3><p class="service">${t.service}</p><div class="tailor-info"><span>${t.city}</span><span>${t.rate || 0} تقييم</span></div><p class="price">يبدأ من ${t.price || 0} د.أ</p><a href="tailor-profile.html?tailor=${t.id}" class="card-btn">عرض الملف</a></div></div>` 
+            }) 
+        } 
+        
+        function favs() { return JSON.parse(localStorage.getItem('favorites') || '[]') } 
+        function isFavorite(id) { return favs().indexOf(id) !== -1 } 
+        function toggleFavorite(e, id, el) { e.stopPropagation(); var f = favs(); if (f.indexOf(id) === -1) { f.push(id); el.innerHTML = '♥' } else { f = f.filter(x => x !== id); el.innerHTML = '♡' } localStorage.setItem('favorites', JSON.stringify(f)) } 
+        function searchTailor(event) { event.preventDefault(); var v = document.getElementById('searchInput').value.trim(); if (v === '') { document.getElementById('searchResult').innerHTML = 'اكتبي اسم الخياط او الخدمة او المدينة'; document.getElementById('searchResult').style.color = 'red'; return } window.location.href = 'tailors.html?search=' + encodeURIComponent(v) } 
+        function goService(s) { window.location.href = 'tailors.html?search=' + encodeURIComponent(s) } 
+        function goCity(c) { window.location.href = 'tailors.html?city=' + encodeURIComponent(c) } 
+        
+        renderFeatured();
         </script>
 </body>
 
