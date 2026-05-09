@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إنشاء حساب | تيلورهب</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Tahoma, sans-serif
+        }
+
+        body {
+            background: #fffaf6;
+            color: #222;
+            line-height: 1.7
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit
+        }
+
+        ul {
+            list-style: none
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: auto
+        }
+#accountLink {
+    display: none;
+}
+        header {
+            background: #fff;
+            border-bottom: 1px solid #f0dfd7;
+            position: sticky;
+            top: 0;
+            z-index: 1000
+        }
+
+        .navbar {
+            min-height: 70px;
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #b9573d
+        }
+
+        .logo-box {
+            width: 36px;
+            height: 36px;
+            background: #d96b4c;
+            color: #fff;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px
+        }
+
+        .nav-links a {
+            padding: 8px 12px;
+            border-radius: 18px;
+            transition: .3s;
+            color: #555;
+            white-space: nowrap
+        }
+
+        .nav-links a:hover,
+        .nav-links .active {
+            background: #fff2ec;
+            color: #d96b4c
+        }
+
+        .auth-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .login-btn {
+            font-size: 14px;
+            color: #222
+        }
+
+        .register-btn {
+            background: #d96b4c;
+            color: white;
+            padding: 9px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: .3s
+        }
+
+        .register-btn:hover {
+            opacity: .9
+        }
+
+        .menu-btn {
+            display: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #b9573d
+        }
+
+        .mobile-menu {
+            display: none;
+            background: #fff;
+            border-top: 1px solid #f0dfd7;
+            padding: 10px 0
+        }
+
+        .mobile-menu a {
+            display: block;
+            padding: 12px 5%;
+            border-bottom: 1px solid #f6e7df;
+            color: #444
+        }
+
+        .mobile-menu.active {
+            display: block
+        }
+
+        .page-header {
+            padding: 60px 0 35px;
+            text-align: center
+        }
+
+        .page-header h1 {
+            font-size: 42px;
+            margin-bottom: 12px;
+            color: #171717
+        }
+
+        .page-header p {
+            color: #666;
+            max-width: 760px;
+            margin: auto
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 38px
+        }
+
+        .section-title h2 {
+            font-size: 34px;
+            margin-bottom: 8px
+        }
+
+        .section-title p {
+            color: #666
+        }
+
+        section {
+            padding: 70px 0
+        }
+
+        .btn-main {
+            display: inline-block;
+            border: none;
+            background: #d96b4c;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: .3s
+        }
+
+        .btn-main:hover {
+            background: #bd5438;
+            transform: translateY(-2px)
+        }
+
+        .btn-light {
+            display: inline-block;
+            background: #fff2ec;
+            color: #b9573d;
+            padding: 11px 22px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid #f0dfd7;
+            border-radius: 20px;
+            padding: 22px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .05)
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .input-group.full {
+            grid-column: 1/-1
+        }
+
+        .input-group label {
+            font-size: 14px;
+            color: #444
+        }
+
+        .input-group input,
+        .input-group select,
+        .input-group textarea {
+            border: 1px solid #ead6cc;
+            border-radius: 14px;
+            padding: 14px 16px;
+            outline: none;
+            font-size: 15px;
+            background: #fff;
+            transition: .3s
+        }
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            border-color: #d96b4c
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px
+        }
+
+        .success-message {
+            display: none;
+            margin-top: 18px;
+            background: #eaf9ef;
+            border: 1px solid #b9e7c6;
+            color: #23824c;
+            padding: 14px;
+            border-radius: 14px
+        }
+
+        .error-message {
+            display: none;
+            margin-top: 18px;
+            background: #fff1f1;
+            border: 1px solid #ffc2c2;
+            color: #b12b2b;
+            padding: 14px;
+            border-radius: 14px
+        }
+
+        .placeholder-img {
+            height: 190px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #f4c7b7, #fff2ec);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #b9573d;
+            font-weight: bold;
+            font-size: 28px;
+            overflow: hidden
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 7px 13px;
+            border-radius: 18px;
+            background: #fff2ec;
+            color: #b9573d;
+            font-size: 13px;
+            margin: 3px
+        }
+
+        footer {
+            background-color: white;
+            border-top: 1px solid #f0dfd7;
+            padding: 35px 0 18px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 25px;
+        }
+
+        .footer-logo {
+            color: #b9573d;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .footer-col h3 {
+            margin-bottom: 12px;
+            font-size: 17px;
+        }
+
+        .footer-col p,
+        .footer-col li {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 7px;
+        }
+
+        .social {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .social span {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ead6cc;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #d96b4c;
+            font-size: 13px;
+        }
+
+        .copyright {
+            border-top: 1px solid #f0dfd7;
+            padding-top: 18px;
+            text-align: center;
+            color: #777;
+            font-size: 14px;
+        }
+        @media(max-width:1080px) {
+
+            .nav-links,
+            .auth-buttons {
+                display: none
+            }
+
+            .menu-btn {
+                display: block
+            }
+
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr)
+            }
+        }
+
+        @media(max-width:700px) {
+            .page-header h1 {
+                font-size: 32px
+            }
+
+            .form-grid,
+            .footer-grid {
+                grid-template-columns: 1fr
+            }
+
+            section {
+                padding: 45px 0
+            }
+        }
+    </style>
+</head>
+
+<body>
+ <header>
+        <div class="container" style="display: flex; gap:150px;justify-content: center;align-items: center;">
+            <div>
+             <a href="Home.html" class="logo">
+                    <span class="logo-box">✂</span>
+                    <span>تيلورهب</span>
+                </a>
+                </div>
+                <div>
+            <nav class="navbar">
+               
+                <ul class="nav-links">
+                    <li><a href="Home.html">الرئيسية</a></li>
+                    <li><a href="tailors.html">الخياطون</a></li>
+                    <li><a href="custom-order.html">اطلب التصميم</a></li>
+                    <li><a href="booking.html">احجز موعد</a></li>
+                    <li><a href="tracking.html">تتبع طلبي</a></li>
+                    <li><a href="about.html">من نحن</a></li>
+                    <li><a href="contact.html" class="active">تواصل معنا</a></li>
+                    <li><a href="" id="accountLink" >حسابي</a></li>
+                </ul>
+
+              
+            </nav>
+            </div>
+
+                <div class="menu-btn" onclick="toggleMenu()">☰</div>
+                 <div class="auth-buttons">
+                    <a href="login.html" class="login-btn">تسجيل الدخول</a>
+                    <a href="register.html" class="register-btn">إنشاء حساب</a>
+                </div>
+        </div>
+
+        <div class="mobile-menu" id="mobileMenu">
+            <a href="Home.html">الرئيسية</a>
+            <a href="tailors.html">الخياطون</a>
+            <a href="custom-order.html">اطلب التصميم</a>
+            <a href="booking.html">احجز موعد</a>
+            <a href="tracking.html">تتبع طلبي</a>
+            <a href="about.html">من نحن</a>
+            <a href="contact.html">تواصل معنا</a>
+            <a href="my-account.html">حسابي</a>
+            <a href="login.html">تسجيل الدخول</a>
+            <a href="register.html">إنشاء حساب</a>
+        </div>
+    </header>
+    <main>
+        <section class="page-header">
+            <div class="container">
+                <h1>إنشاء حساب</h1>
+                <p>اختاري نوع حسابك وابدئي رحلتك مع تيلورهب</p>
+            </div>
+        </section>
+        <section>
+            <div class="container">
+                <div class="card" style="max-width:720px;margin:auto">
+                    <form id="registerForm">
+                        <div class="form-grid">
+                            <div class="input-group"><label>نوع الحساب</label><select id="accountType">
+                                    <option value="customer">عميل</option>
+                                    <option value="tailor">خياط</option>
+                                </select></div>
+                            <div class="input-group"><label>الاسم الكامل</label><input id="name" required></div>
+                            <div class="input-group"><label>رقم الهاتف</label><input id="phone" required></div>
+                            <div class="input-group"><label>البريد الإلكتروني</label><input type="email" id="email"
+                                    required></div>
+                            <div class="input-group"><label>المدينة</label><input id="city" required></div>
+                            <div class="input-group"><label>كلمة المرور</label><input type="password" id="password"
+                                    required></div>
+                        </div><button class="btn-main" style="width:100%;margin-top:24px">إنشاء الحساب</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="footer-logo" style="display: flex;"> تيلورهب   <span class="logo-box">✂</span>
+</div>
+                    <p>
+                     
+                        منصة تربط العملاء بأمهر الخياطين في الأردن<br>
+                        لتجربة تفصيل عصرية وموثوقة
+                    </p>
+                </div>
+
+                <div class="footer-col">
+                    <h3>الخدمات</h3>
+                    <ul>
+                       <a href="tailors.html"><li>تصفح الخياطين</li></a> 
+                        <a href="custom-order.html"><li>طلب تصميم مخصص</li></a>
+                        <a href="booking.html"><li>حجز موعد</li></a>
+                       <a href="tracking.html"> <li>تتبع الطلب</li></a>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h3>عن المنصة</h3>
+                    <ul>
+                       <a href="about.html"> <li>من نحن</li></a>
+                       <a href="contact.html"><li>تواصل معنا</li></a>
+                        <a href="tailors.html"><li>شروط الاستخدام</li></a>
+                        <a href="tailors.html"><li>سياسة الخصوصية</li></a>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h3>تواصل معنا</h3>
+                    <ul>
+                        <li>info@tailorhub.jo</li>
+                        <li>+962 7 9012 3456</li>
+                        <li>عمان الأردن</li>
+                    </ul>
+
+                    <div class="social">
+                       <a href="https://www.facebook.com/?locale=ar_AR" target="_blank"> <span>f</span></a>
+                           <a href=" https://x.com/" target="_blank"> <span>x</span></a>
+                            <a href="https://www.linkedin.com/in/malakzoubi/" target="_blank"><span>in</span></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="copyright">
+                © 2025 تيلورهب جميع الحقوق محفوظة
+            </div>
+        </div>
+    </footer>
+    <script>
+    window.onload = function() {
+        // جلب بيانات المستخدم من localStorage
+        var userData = JSON.parse(localStorage.getItem('userData'));
+
+        // إذا كانت بيانات المستخدم موجودة
+        if (userData) {
+            // إظهار "حسابي" في الـ navbar
+            document.getElementById('accountLink').style.display = 'block';
+
+            // إذا كان المستخدم "مشتري" أو "خياط"
+            if (userData.userType === 'buyer') {
+                document.getElementById('accountLink').href = 'my-account.html'; // رابط للمشتري
+            } else if (userData.userType === 'tailor') {
+                document.getElementById('accountLink').href = 'tailor-dashboard.html'; // رابط للخياط
+            }
+
+            // إخفاء روابط "تسجيل الدخول" و "إنشاء حساب"
+            document.querySelector('.login-btn').style.display = 'none';
+            document.querySelector('.register-btn').style.display = 'none';
+        } else {
+            // إذا لم يكن المستخدم مسجلاً دخوله، لا تعرض رابط "حسابي"
+            document.getElementById('accountLink').style.display = 'none';
+        }
+    };
+</script>
+    <script>function toggleMenu() { var m = document.getElementById('mobileMenu'); if (m) { m.classList.toggle('active') } } function normalizeText(t) { return String(t || '').toLowerCase().replace(/أ|إ|آ/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي').trim() }</script>
+    <script>
+        registerForm.onsubmit = function (e) {
+            e.preventDefault();
+            var user = {
+                fullName: fullName.value,
+                email: email.value,
+                phone: phone.value,
+                city: city.value,
+                userType: accountType.value === 'tailor' ? 'tailor' : 'buyer',
+                bio: "",
+                createdAt: new Date().toISOString()
+            };
+            localStorage.setItem("tailorhubUser", JSON.stringify(user));
+            location.href = user.userType === "tailor" ? "tailor-dashboard.html" : "my-account.html";
+        }
+    </script>
+</body>
+
+</html>

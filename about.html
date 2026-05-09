@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>من نحن | تيلورهب</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Tahoma, sans-serif;
+        }
+
+        body {
+            background-color: #fffaf6;
+            color: #222;
+            line-height: 1.7;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        #accountLink {
+            display: none;
+        }
+
+        header {
+            background-color: #fff;
+            border-bottom: 1px solid #f0dfd7;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar {
+            min-height: 70px;
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #b9573d;
+        }
+
+        .logo-box {
+            width: 36px;
+            height: 36px;
+            background-color: #d96b4c;
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+        }
+
+        .nav-links a {
+            padding: 8px 12px;
+            border-radius: 18px;
+            transition: 0.3s;
+            color: #555;
+            white-space: nowrap;
+        }
+
+        .nav-links a:hover,
+        .nav-links .active {
+            background-color: #fff2ec;
+            color: #d96b4c;
+        }
+
+        .auth-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .login-btn {
+            font-size: 14px;
+            color: #222;
+        }
+
+        .register-btn {
+            background-color: #d96b4c;
+            color: white;
+            padding: 9px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .menu-btn {
+            display: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #b9573d;
+        }
+
+        .mobile-menu {
+            display: none;
+            background-color: white;
+            border-top: 1px solid #f0dfd7;
+        }
+
+        .mobile-menu a {
+            display: block;
+            padding: 12px 5%;
+            border-bottom: 1px solid #f6e7df;
+            color: #444;
+        }
+
+        .mobile-menu.active {
+            display: block;
+        }
+
+        .hero-about {
+            background-color: #fff3ec;
+            padding: 70px 0;
+            text-align: center;
+        }
+
+        .badge {
+            display: inline-block;
+            background-color: #fff;
+            color: #d96b4c;
+            border: 1px solid #f0d8ce;
+            padding: 8px 18px;
+            border-radius: 25px;
+            font-size: 14px;
+            margin-bottom: 18px;
+        }
+
+        .hero-about h1 {
+            font-size: 42px;
+            color: #d96b4c;
+            margin-bottom: 12px;
+        }
+
+        .hero-about p {
+            max-width: 760px;
+            margin: 0 auto 28px;
+            color: #555;
+            font-size: 17px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .btn-main {
+            background-color: #d96b4c;
+            color: white;
+            padding: 12px 26px;
+            border-radius: 10px;
+            display: inline-block;
+            transition: 0.3s;
+        }
+
+        .btn-light {
+            background-color: white;
+            color: #222;
+            padding: 12px 26px;
+            border-radius: 10px;
+            border: 1px solid #ead6cc;
+            display: inline-block;
+            transition: 0.3s;
+        }
+
+        .btn-main:hover,
+        .btn-light:hover {
+            transform: translateY(-3px);
+        }
+
+        section {
+            padding: 55px 0;
+        }
+
+        .two-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 28px;
+        }
+
+        .info-card {
+            background-color: white;
+            border: 1px solid #f0dfd7;
+            border-radius: 22px;
+            padding: 30px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+            position: relative;
+        }
+
+        .card-icon {
+            width: 38px;
+            height: 38px;
+            background-color: #fff2ec;
+            color: #d96b4c;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 14px;
+            font-size: 18px;
+        }
+
+        .info-card h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .info-card p {
+            color: #666;
+            font-size: 15px;
+        }
+
+        .values-section {
+            background-color: #fff;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .section-title h2 {
+            font-size: 34px;
+            margin-bottom: 8px;
+        }
+
+        .section-title p {
+            color: #666;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 22px;
+        }
+
+        .value-card {
+            background-color: white;
+            border: 1px solid #f0dfd7;
+            border-radius: 18px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        .value-card .card-icon {
+            margin: 0 auto 14px;
+        }
+
+        .value-card h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .value-card p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .stats-box {
+            background: linear-gradient(135deg, #d96b4c, #c85b3f);
+            color: white;
+            border-radius: 18px;
+            padding: 34px 25px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            text-align: center;
+            gap: 15px;
+        }
+
+        .stat h2 {
+            font-size: 34px;
+            margin-bottom: 5px;
+        }
+
+        .stat p {
+            color: #fff3ee;
+            font-size: 14px;
+        }
+
+        .join-section {
+            text-align: center;
+        }
+
+        .join-icon {
+            font-size: 34px;
+            color: #d96b4c;
+            margin-bottom: 12px;
+        }
+
+        .join-section h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .join-section p {
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto 24px;
+        }
+
+        footer {
+            background-color: white;
+            border-top: 1px solid #f0dfd7;
+            padding: 35px 0 18px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 25px;
+        }
+
+        .footer-logo {
+            color: #b9573d;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .footer-col h3 {
+            margin-bottom: 12px;
+            font-size: 17px;
+        }
+
+        .footer-col p,
+        .footer-col li {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 7px;
+        }
+
+        .social {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .social span {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ead6cc;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #d96b4c;
+            font-size: 13px;
+        }
+
+        .copyright {
+            border-top: 1px solid #f0dfd7;
+            padding-top: 18px;
+            text-align: center;
+            color: #777;
+            font-size: 14px;
+        }
+
+        @media (max-width: 1080px) {
+
+            .nav-links,
+            .auth-buttons {
+                display: none;
+            }
+
+            .menu-btn {
+                display: block;
+            }
+
+            .two-cards,
+            .values-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stats-box,
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 650px) {
+            .hero-about h1 {
+                font-size: 32px;
+            }
+
+            .two-cards,
+            .values-grid,
+            .stats-box,
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            section {
+                padding: 40px 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container" style="display: flex; gap:150px;justify-content: center;align-items: center;">
+            <div>
+                <a href="Home.html" class="logo">
+                    <span class="logo-box">✂</span>
+                    <span>تيلورهب</span>
+                </a>
+            </div>
+            <div>
+                <nav class="navbar">
+
+                    <ul class="nav-links">
+                        <li><a href="Home.html">الرئيسية</a></li>
+                        <li><a href="tailors.html">الخياطون</a></li>
+                        <li><a href="custom-order.html">اطلب التصميم</a></li>
+                        <li><a href="booking.html">احجز موعد</a></li>
+                        <li><a href="tracking.html">تتبع طلبي</a></li>
+                        <li><a href="about.html" class="active">من نحن</a></li>
+                        <li><a href="contact.html">تواصل معنا</a></li>
+                        <li><a href="" id="accountLink">حسابي</a></li>
+                    </ul>
+
+
+                </nav>
+            </div>
+
+            <div class="menu-btn" onclick="toggleMenu()">☰</div>
+            <div class="auth-buttons">
+                <a href="login.html" class="login-btn">تسجيل الدخول</a>
+                <a href="register.html" class="register-btn">إنشاء حساب</a>
+            </div>
+        </div>
+
+        <div class="mobile-menu" id="mobileMenu">
+            <a href="Home.html">الرئيسية</a>
+            <a href="tailors.html">الخياطون</a>
+            <a href="custom-order.html">اطلب التصميم</a>
+            <a href="booking.html">احجز موعد</a>
+            <a href="tracking.html">تتبع طلبي</a>
+            <a href="about.html">من نحن</a>
+            <a href="contact.html">تواصل معنا</a>
+            <a href="my-account.html">حسابي</a>
+            <a href="login.html">تسجيل الدخول</a>
+            <a href="register.html">إنشاء حساب</a>
+        </div>
+    </header>
+
+    <main>
+
+        <section class="hero-about">
+            <div class="container">
+                <span class="badge">♡ من نحن</span>
+
+                <h1>عن تيلورهب</h1>
+
+                <p>
+                    المنصة الأولى في الأردن التي تربط العملاء بأفضل الخياطين المحترفين
+                    لنقدم لك تجربة خياطة مميزة تجمع بين الأصالة والحداثة
+                </p>
+
+                <div class="hero-buttons">
+                    <a href="tailors.html" class="btn-main">استكشف الخياطين</a>
+                    <a href="contact.html" class="btn-light">تواصل معنا</a>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="container">
+                <div class="two-cards">
+                    <div class="info-card">
+                        <div class="card-icon">◎</div>
+                        <h3>رسالتنا</h3>
+                        <p>
+                            نسعى لتسهيل الوصول إلى خياطين موثوقين ومهرة في جميع أنحاء الأردن
+                            ونوفر تجربة طلب سهلة وآمنة للعميل مع دعم أصحاب الحرف المحلية.
+                        </p>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="card-icon">◈</div>
+                        <h3>رؤيتنا</h3>
+                        <p>
+                            أن نصبح المنصة الرائدة في مجال الخياطة والتصميم المخصص في الأردن
+                            من خلال ربط العملاء بالخياط المناسب بطريقة عصرية وسهلة.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="values-section">
+            <div class="container">
+                <div class="section-title">
+                    <h2>قيمنا الأساسية</h2>
+                    <p>نؤمن بمجموعة من القيم التي تجعل تجربتك أفضل</p>
+                </div>
+
+                <div class="values-grid">
+                    <div class="value-card">
+                        <div class="card-icon">□</div>
+                        <h3>الثقة والموثوقية</h3>
+                        <p>نعمل على اختيار خياطين موثوقين لضمان تجربة آمنة ومريحة.</p>
+                    </div>
+
+                    <div class="value-card">
+                        <div class="card-icon">◇</div>
+                        <h3>جودة الخدمة</h3>
+                        <p>نهتم بجودة التفاصيل من بداية الطلب حتى استلام القطعة.</p>
+                    </div>
+
+                    <div class="value-card">
+                        <div class="card-icon">○</div>
+                        <h3>سهولة الوصول</h3>
+                        <p>نوفر طريقة سهلة لحجز المواعيد وطلب التصاميم من أي مكان.</p>
+                    </div>
+
+                    <div class="value-card">
+                        <div class="card-icon">✕</div>
+                        <h3>دعم أصحاب الحرف</h3>
+                        <p>نساعد الخياطين المحليين على الوصول إلى عملاء أكثر.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="container">
+                <div class="stats-box">
+                    <div class="stat">
+                        <h2>+500</h2>
+                        <p>خياط محترف</p>
+                    </div>
+
+                    <div class="stat">
+                        <h2>+10,000</h2>
+                        <p>طلب مكتمل</p>
+                    </div>
+
+                    <div class="stat">
+                        <h2>+50,000</h2>
+                        <p>عميل سعيد</p>
+                    </div>
+
+                    <div class="stat">
+                        <h2>+15</h2>
+                        <p>مدينة أردنية</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="join-section">
+            <div class="container">
+                <div class="join-icon">♡</div>
+
+                <h2>انضم إلى مجتمع تيلورهب اليوم</h2>
+
+                <p>
+                    سواء كنت تبحث عن خياط محترف أو ترغب في تطوير عملك كخياط
+                    نحن هنا لمساعدتك في رحلتك
+                </p>
+
+                <div class="hero-buttons">
+                    <a href="register.html" class="btn-main">انشاء حساب جديد</a>
+                    <a href="tailors.html" class="btn-light">تصفح الخياطين</a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="footer-logo" style="display: flex;"> تيلورهب <span class="logo-box">✂</span>
+                    </div>
+                    <p>
+
+                        منصة تربط العملاء بأمهر الخياطين في الأردن<br>
+                        لتجربة تفصيل عصرية وموثوقة
+                    </p>
+                </div>
+
+                <div class="footer-col">
+                    <h3>الخدمات</h3>
+                    <ul>
+                        <a href="tailors.html">
+                            <li>تصفح الخياطين</li>
+                        </a>
+                        <a href="custom-order.html">
+                            <li>طلب تصميم مخصص</li>
+                        </a>
+                        <a href="booking.html">
+                            <li>حجز موعد</li>
+                        </a>
+                        <a href="tracking.html">
+                            <li>تتبع الطلب</li>
+                        </a>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h3>عن المنصة</h3>
+                    <ul>
+                        <a href="about.html">
+                            <li>من نحن</li>
+                        </a>
+                        <a href="contact.html">
+                            <li>تواصل معنا</li>
+                        </a>
+                        <a href="tailors.html">
+                            <li>شروط الاستخدام</li>
+                        </a>
+                        <a href="tailors.html">
+                            <li>سياسة الخصوصية</li>
+                        </a>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h3>تواصل معنا</h3>
+                    <ul>
+                        <li>info@tailorhub.jo</li>
+                        <li>+962 7 9012 3456</li>
+                        <li>عمان الأردن</li>
+                    </ul>
+
+                    <div class="social">
+                        <a href="https://www.facebook.com/?locale=ar_AR" target="_blank"> <span>f</span></a>
+                        <a href=" https://x.com/" target="_blank"> <span>x</span></a>
+                        <a href="https://www.linkedin.com/in/malakzoubi/" target="_blank"><span>in</span></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="copyright">
+                © 2025 تيلورهب جميع الحقوق محفوظة
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        window.onload = function () {
+            var user = JSON.parse(localStorage.getItem('tailorhubUser'));
+            var accountLink = document.getElementById('accountLink');
+            var loginBtn = document.querySelector('.login-btn');
+            var registerBtn = document.querySelector('.register-btn');
+
+            if (user) {
+                if (accountLink) {
+                    accountLink.style.display = 'block';
+                    accountLink.href = user.userType === 'tailor' ? 'tailor-dashboard.html' : 'my-account.html';
+                }
+                if (loginBtn) loginBtn.style.display = 'none';
+                if (registerBtn) registerBtn.style.display = 'none';
+            } else {
+                if (accountLink) accountLink.style.display = 'none';
+            }
+        };
+    </script>
+    <script>
+
+        function toggleMenu() {
+            var menu = document.getElementById("mobileMenu");
+
+            if (menu) {
+                menu.classList.toggle("active");
+            }
+        }
+    </script>
+
+</body>
+
+</html>

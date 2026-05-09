@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تواصل معنا | تيلورهب</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Tahoma, sans-serif;
+        }
+
+        body {
+            background-color: #fffaf6;
+            color: #222;
+            line-height: 1.7;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: auto;
+        }
+#accountLink {
+    display: none;
+}
+        header {
+            background-color: #fff;
+            border-bottom: 1px solid #f0dfd7;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar {
+            min-height: 70px;
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #b9573d;
+        }
+
+        .logo-box {
+            width: 36px;
+            height: 36px;
+            background-color: #d96b4c;
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+        }
+
+        .nav-links a {
+            padding: 8px 12px;
+            border-radius: 18px;
+            transition: 0.3s;
+            color: #555;
+            white-space: nowrap;
+        }
+
+        .nav-links a:hover,
+        .nav-links .active {
+            background-color: #fff2ec;
+            color: #d96b4c;
+        }
+
+        .auth-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .login-btn {
+            font-size: 14px;
+            color: #222;
+        }
+
+        .register-btn {
+            background-color: #d96b4c;
+            color: white;
+            padding: 9px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .menu-btn {
+            display: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #b9573d;
+        }
+
+        .mobile-menu {
+            display: none;
+            background-color: white;
+            border-top: 1px solid #f0dfd7;
+        }
+
+        .mobile-menu a {
+            display: block;
+            padding: 12px 5%;
+            border-bottom: 1px solid #f6e7df;
+            color: #444;
+        }
+
+        .mobile-menu.active {
+            display: block;
+        }
+
+        .hero-contact {
+            background-color: #fff3ec;
+            padding: 75px 0;
+            text-align: center;
+        }
+
+        .badge {
+            display: inline-block;
+            background-color: white;
+            color: #d96b4c;
+            border: 1px solid #f0d8ce;
+            padding: 8px 18px;
+            border-radius: 25px;
+            font-size: 14px;
+            margin-bottom: 18px;
+        }
+
+        .hero-contact h1 {
+            font-size: 42px;
+            color: #d96b4c;
+            margin-bottom: 12px;
+        }
+
+        .hero-contact p {
+            max-width: 780px;
+            margin: auto;
+            color: #555;
+            font-size: 17px;
+        }
+
+        section {
+            padding: 55px 0;
+        }
+
+        .contact-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 34px;
+            align-items: start;
+        }
+
+        .contact-info h2,
+        .contact-form h2 {
+            font-size: 26px;
+            margin-bottom: 20px;
+        }
+
+        .info-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .info-box {
+            background-color: white;
+            border: 1px solid #f0dfd7;
+            border-radius: 16px;
+            padding: 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.035);
+        }
+
+        .info-icon {
+            width: 42px;
+            height: 42px;
+            background-color: #fff2ec;
+            color: #d96b4c;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 17px;
+            flex-shrink: 0;
+        }
+
+        .info-box h3 {
+            font-size: 16px;
+            margin-bottom: 3px;
+        }
+
+        .info-box p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .map-box {
+            margin-top: 18px;
+            height: 190px;
+            background-color: #f7f3ef;
+            border-radius: 18px;
+            border: 1px solid #f0dfd7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: #999;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .map-icon {
+            width: 46px;
+            height: 46px;
+            border: 1px solid #ead6cc;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #d96b4c;
+            background-color: white;
+        }
+
+        .contact-form {
+            background-color: white;
+            border: 1px solid #f0dfd7;
+            border-radius: 22px;
+            padding: 28px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            color: #444;
+            font-size: 14px;
+        }
+
+        .input-group input,
+        .input-group textarea {
+            border: 1px solid #ead6cc;
+            border-radius: 14px;
+            padding: 14px 16px;
+            outline: none;
+            background-color: white;
+            transition: 0.3s;
+            font-size: 15px;
+        }
+
+        .input-group input:focus,
+        .input-group textarea:focus {
+            border-color: #d96b4c;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 140px;
+        }
+
+        .send-btn {
+            width: 100%;
+            border: none;
+            background-color: #d96b4c;
+            color: white;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .send-btn:hover {
+            background-color: #bd5438;
+            transform: translateY(-2px);
+        }
+
+        .success-message {
+            display: none;
+            margin-top: 16px;
+            background-color: #eaf9ef;
+            border: 1px solid #b9e7c6;
+            color: #23824c;
+            padding: 14px;
+            border-radius: 14px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .faq-section {
+            background-color: #fff;
+            text-align: center;
+        }
+
+        .faq-box {
+            background-color: #d96b4c;
+            border-radius: 22px;
+            padding: 40px 25px;
+            border: 1px solid #f0dfd7;
+        }
+
+        .faq-box h2 {
+            font-size: 26px;
+            margin-bottom: 10px;
+            color: #ffff;
+        }
+
+        .faq-box p {
+            color: #fffaf6;
+            margin-bottom: 22px;
+        }
+
+        .btn-light {
+            font-weight:bolder;
+            display: inline-block;
+            background-color: white;
+            color: #000000;
+            padding: 12px 26px;
+            border-radius: 10px;
+            border: 1px solid #ead6cc;
+            transition: 0.3s;
+        }
+
+        .btn-light:hover {
+            transform: translateY(-3px);
+            color: #d96b4c;
+        }
+
+        
+        footer {
+            background-color: white;
+            border-top: 1px solid #f0dfd7;
+            padding: 35px 0 18px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 25px;
+        }
+
+        .footer-logo {
+            color: #b9573d;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .footer-col h3 {
+            margin-bottom: 12px;
+            font-size: 17px;
+        }
+
+        .footer-col p,
+        .footer-col li {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 7px;
+        }
+
+        .social {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .social span {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ead6cc;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #d96b4c;
+            font-size: 13px;
+        }
+
+        .copyright {
+            border-top: 1px solid #f0dfd7;
+            padding-top: 18px;
+            text-align: center;
+            color: #777;
+            font-size: 14px;
+        }
+        @media (max-width: 1080px) {
+
+            .nav-links,
+            .auth-buttons {
+                display: none;
+            }
+
+            .menu-btn {
+                display: block;
+            }
+
+            .contact-layout,
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 750px) {
+            .hero-contact h1 {
+                font-size: 32px;
+            }
+
+            .contact-layout,
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            section {
+                padding: 40px 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+        <header>
+        <div class="container" style="display: flex; gap:150px;justify-content: center;align-items: center;">
+            <div>
+             <a href="Home.html" class="logo">
+                    <span class="logo-box">✂</span>
+                    <span>تيلورهب</span>
+                </a>
+                </div>
+                <div>
+            <nav class="navbar">
+               
+                <ul class="nav-links">
+                    <li><a href="Home.html">الرئيسية</a></li>
+                    <li><a href="tailors.html">الخياطون</a></li>
+                    <li><a href="custom-order.html">اطلب التصميم</a></li>
+                    <li><a href="booking.html">احجز موعد</a></li>
+                    <li><a href="tracking.html">تتبع طلبي</a></li>
+                    <li><a href="about.html">من نحن</a></li>
+                    <li><a href="contact.html" class="active">تواصل معنا</a></li>
+                    <li><a href="" id="accountLink" >حسابي</a></li>
+                </ul>
+
+              
+            </nav>
+            </div>
+
+                <div class="menu-btn" onclick="toggleMenu()">☰</div>
+                 <div class="auth-buttons">
+                    <a href="login.html" class="login-btn">تسجيل الدخول</a>
+                    <a href="register.html" class="register-btn">إنشاء حساب</a>
+                </div>
+        </div>
+
+        <div class="mobile-menu" id="mobileMenu">
+            <a href="Home.html">الرئيسية</a>
+            <a href="tailors.html">الخياطون</a>
+            <a href="custom-order.html">اطلب التصميم</a>
+            <a href="booking.html">احجز موعد</a>
+            <a href="tracking.html">تتبع طلبي</a>
+            <a href="about.html">من نحن</a>
+            <a href="contact.html">تواصل معنا</a>
+            <a href="my-account.html">حسابي</a>
+            <a href="login.html">تسجيل الدخول</a>
+            <a href="register.html">إنشاء حساب</a>
+        </div>
+    </header>
+
+    <main>
+
+        <section class="hero-contact">
+            <div class="container">
+                <span class="badge">✉ تواصل معنا</span>
+
+                <h1>نحن هنا لمساعدتك</h1>
+
+                <p>
+                    هل لديك سؤال أو استفسار نحن نحب أن نسمع منك
+                    تواصل معنا وسنرد عليك في أقرب وقت ممكن
+                </p>
+            </div>
+        </section>
+
+        <section>
+            <div class="container">
+
+                <div class="contact-layout">
+
+                    <div class="contact-info">
+                        <h2>معلومات التواصل</h2>
+
+                        <div class="info-list">
+                            <div class="info-box">
+                                <div class="info-icon">✉</div>
+                                <div>
+                                    <h3>البريد الإلكتروني</h3>
+                                    <p>support@tailorhub.jo</p>
+                                </div>
+                            </div>
+
+                            <div class="info-box">
+                                <div class="info-icon">☎</div>
+                                <div>
+                                    <h3>رقم الهاتف</h3>
+                                    <p>+962 7 9012 3456</p>
+                                </div>
+                            </div>
+
+                            <div class="info-box">
+                                <div class="info-icon">⌖</div>
+                                <div>
+                                    <h3>الموقع</h3>
+                                    <p>عمان الأردن</p>
+                                </div>
+                            </div>
+
+                            <div class="info-box">
+                                <div class="info-icon">◴</div>
+                                <div>
+                                    <h3>ساعات العمل</h3>
+                                    <p>الأحد - الخميس 9 ص - 6 م</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="map-box">
+                            <iframe src="https://www.google.com/maps?q=Amman%20Jordan%20office&output=embed"
+                                width="100%" height="100%" style="border:0; border-radius:18px;" allowfullscreen=""
+                                loading="lazy">
+                            </iframe>
+                        </div>
+                    </div>
+
+                    <div class="contact-form">
+                        <h2>أرسل رسالتك</h2>
+
+                        <form id="contactForm">
+                            <div class="input-group">
+                                <label>الاسم الكامل</label>
+                                <input type="text" id="fullName" required>
+                            </div>
+
+                            <div class="input-group">
+                                <label>البريد الإلكتروني</label>
+                                <input type="email" id="email" required>
+                            </div>
+
+                            <div class="input-group">
+                                <label>الرسالة</label>
+                                <textarea id="message" placeholder="اكتب رسالتك هنا..." required></textarea>
+                            </div>
+
+                            <button type="submit" class="send-btn">إرسال الرسالة</button>
+
+                            <div class="success-message" id="successMessage">
+                                تم إرسال رسالتك بنجاح
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <section class="faq-section">
+            <div class="container">
+                <div class="faq-box">
+                    <h2>هل لديك أي سؤال؟</h2>
+                    <p>
+                        يمكنك الاطلاع على الأسئلة الشائعة لمعرفة المزيد عن خدماتنا وطريقة استخدام المنصة
+                    </p>
+
+                    <a href="about.html" class="btn-light">شاهد الأسئلة الشائعة</a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="footer-logo" style="display: flex;"> تيلورهب   <span class="logo-box">✂</span>
+</div>
+                    <p>
+                     
+                        منصة تربط العملاء بأمهر الخياطين في الأردن<br>
+                        لتجربة تفصيل عصرية وموثوقة
+                    </p>
+                </div>
+
+                <div class="footer-col">
+                    <h3>الخدمات</h3>
+                    <ul>
+                       <a href="tailors.html"><li>تصفح الخياطين</li></a> 
+                        <a href="custom-order.html"><li>طلب تصميم مخصص</li></a>
+                        <a href="booking.html"><li>حجز موعد</li></a>
+                       <a href="tracking.html"> <li>تتبع الطلب</li></a>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h3>عن المنصة</h3>
+                    <ul>
+                       <a href="about.html"> <li>من نحن</li></a>
+                       <a href="contact.html"><li>تواصل معنا</li></a>
+                        <a href="tailors.html"><li>شروط الاستخدام</li></a>
+                        <a href="tailors.html"><li>سياسة الخصوصية</li></a>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h3>تواصل معنا</h3>
+                    <ul>
+                        <li>info@tailorhub.jo</li>
+                        <li>+962 7 9012 3456</li>
+                        <li>عمان الأردن</li>
+                    </ul>
+
+                    <div class="social">
+                       <a href="https://www.facebook.com/?locale=ar_AR" target="_blank"> <span>f</span></a>
+                           <a href=" https://x.com/" target="_blank"> <span>x</span></a>
+                            <a href="https://www.linkedin.com/in/malakzoubi/" target="_blank"><span>in</span></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="copyright">
+                © 2025 تيلورهب جميع الحقوق محفوظة
+            </div>
+        </div>
+    </footer>
+    <script>
+        window.onload = function () {
+            var user = JSON.parse(localStorage.getItem('tailorhubUser'));
+            var accountLink = document.getElementById('accountLink');
+            var loginBtn = document.querySelector('.login-btn');
+            var registerBtn = document.querySelector('.register-btn');
+
+            if (user) {
+                if (accountLink) {
+                    accountLink.style.display = 'block';
+                    accountLink.href = user.userType === 'tailor' ? 'tailor-dashboard.html' : 'my-account.html';
+                }
+                if (loginBtn) loginBtn.style.display = 'none';
+                if (registerBtn) registerBtn.style.display = 'none';
+            } else {
+                if (accountLink) accountLink.style.display = 'none';
+            }
+        };
+    </script>
+
+        <script>
+
+        function toggleMenu() {
+            var menu = document.getElementById("mobileMenu");
+
+            if (menu) {
+                menu.classList.toggle("active");
+            }
+        }
+
+        document.getElementById("contactForm").onsubmit = function (event) {
+            event.preventDefault();
+
+            var messages = JSON.parse(localStorage.getItem("tailorhubMessages") || "[]");
+
+            var newMessage = {
+                name: document.getElementById("fullName").value.trim(),
+                email: document.getElementById("email").value.trim(),
+                message: document.getElementById("message").value.trim(),
+                createdAt: new Date().toLocaleString("ar-JO")
+            };
+
+            messages.unshift(newMessage);
+
+            localStorage.setItem("tailorhubMessages", JSON.stringify(messages));
+
+            document.getElementById("successMessage").style.display = "block";
+
+            document.getElementById("contactForm").reset();
+
+            setTimeout(function () {
+                document.getElementById("successMessage").style.display = "none";
+            }, 4000);
+        };
+    </script>
+
+</body>
+
+</html>
