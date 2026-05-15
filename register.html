@@ -581,52 +581,32 @@
             }
         };
 
-        registerForm.onsubmit = function (e) {
+        registerForm.onsubmit = async function (e) {
             e.preventDefault();
-            
-            var users = JSON.parse(localStorage.getItem("tailorhubUsers") || "[]");
-            
-            if (users.find(u => u.email === email.value)) {
-                alert("هذا البريد الإلكتروني مسجل بالفعل!");
-                return;
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({
+                        fullName: fullName.value,
+                        email: email.value,
+                        phone: phone.value,
+                        city: city.value,
+                        password: password.value,
+                        userType: accountType.value
+                    })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    localStorage.setItem('tailorhubUser', JSON.stringify(data.user));
+                    location.href = data.user.userType === 'tailor' ? 'tailor-dashboard.html' : 'my-account.html';
+                } else {
+                    alert(data.error || 'حدث خطأ أثناء إنشاء الحساب');
+                }
+            } catch (err) {
+                alert('تعذر الاتصال بالخادم');
             }
-
-            var userType = accountType.value === 'tailor' ? 'tailor' : 'buyer';
-            var user = {
-                fullName: fullName.value,
-                email: email.value,
-                phone: phone.value,
-                city: city.value,
-                password: password.value,
-                userType: userType,
-                bio: userType === 'tailor' ? "خياط محترف جديد في تيلورهب" : "مهتمة بتصميم الازياء والتفصيل",
-                createdAt: new Date().toISOString()
-            };
-            
-            users.push(user);
-            localStorage.setItem("tailorhubUsers", JSON.stringify(users));
-            
-            // إذا كان المستخدم خياط، أضفه لقائمة الخياطين المعروضة
-            if (userType === 'tailor') {
-                var tailors = JSON.parse(localStorage.getItem("tailorhubTailors") || "[]");
-                var newTailor = {
-                    id: email.value.replace(/[^a-zA-Z0-9]/g, ''),
-                    email: email.value,
-                    name: fullName.value,
-                    city: city.value,
-                    service: "خياطة وتفصيل",
-                    rate: 0, // تقييم جديد
-                    price: 0,
-                    letter: fullName.value.charAt(0),
-                    bio: user.bio,
-                    services: [["خدمة عامة", "0"]]
-                };
-                tailors.push(newTailor);
-                localStorage.setItem("tailorhubTailors", JSON.stringify(tailors));
-            }
-            
-            localStorage.setItem("tailorhubUser", JSON.stringify(user));
-            location.href = user.userType === "tailor" ? "tailor-dashboard.html" : "my-account.html";
         }
     </script>
 </body>

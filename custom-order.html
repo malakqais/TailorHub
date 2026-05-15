@@ -623,27 +623,27 @@
     <script>
 
     var tailorSelect = document.getElementById('tailor');
-    var customTailorsList = JSON.parse(localStorage.getItem("tailorhubTailors") || "[]");
-    
-    // تنظيف الخيارات الحالية (باستثناء الخيار الأول) وإضافة الخياطين المسجلين
-    tailorSelect.innerHTML = '<option value="">اقتراح أنسب خياط</option>';
-    customTailorsList.forEach(t => {
-        var opt = document.createElement('option');
-        opt.value = t.id;
-        opt.text = t.name;
-        tailorSelect.appendChild(opt);
-    });
-
-    var paramTailor = new URLSearchParams(location.search).get("tailor");
-    if (paramTailor) {
-        tailorSelect.value = paramTailor;
-    }
-
     var customForm = document.getElementById('customForm');
     var successMessage = document.getElementById('successMessage');
-    var tailorSelect = document.getElementById('tailor');
+    var paramTailor = new URLSearchParams(location.search).get("tailor");
 
-    customForm.onsubmit = function (e) {
+    // Load tailors from API
+    (async function loadTailors() {
+        try {
+            var res = await fetch('/api/tailors', { credentials: 'same-origin' });
+            var data = await res.json();
+            tailorSelect.innerHTML = '<option value="">اقتراح أنسب خياط</option>';
+            data.tailors.forEach(function(t) {
+                var opt = document.createElement('option');
+                opt.value = t.id;
+                opt.textContent = t.name;
+                tailorSelect.appendChild(opt);
+            });
+            if (paramTailor) tailorSelect.value = paramTailor;
+        } catch(e) {}
+    })();
+
+    customForm.onsubmit = async function (e) {
         e.preventDefault();
 
         var selectedTailorId = tailorSelect.value;
@@ -658,61 +658,53 @@
             return;
         }
 
-        // جلب المستخدم الحالي لربط الطلب بحسابه
         var user = JSON.parse(localStorage.getItem('tailorhubUser'));
-        var userEmail = user ? user.email : "guest";
 
-        var orders = JSON.parse(localStorage.getItem("tailorhubOrders") || "[]");
-        var id = "TH-" + Date.now().toString().slice(-6);
+        try {
+            var res = await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    type: 'custom',
+                    userEmail: user ? user.email : 'guest',
+                    fullName: document.getElementById('name').value.trim(),
+                    phone: document.getElementById('phone').value.trim(),
+                    city: document.getElementById('city').value,
+                    tailorId: selectedTailorId,
+                    tailorName: selectedTailorName,
+                    service: 'تصميم مخصص',
+                    price: 'يحدد لاحقا',
+                    date: new Date().toLocaleDateString('ar-JO'),
+                    notes: document.getElementById('notes').value,
+                    measurements: {
+                        chest: document.getElementById('chest').value,
+                        waist: document.getElementById('waist').value,
+                        hips: document.getElementById('hips').value,
+                        shoulder: document.getElementById('shoulder').value,
+                        arm: document.getElementById('arm').value,
+                        length: document.getElementById('length').value
+                    }
+                })
+            });
 
-        var newOrder = {
-            id: id,
-            type: "custom",
-            userEmail: userEmail,
-            fullName: document.getElementById('name').value.trim(),
-            phone: document.getElementById('phone').value.trim(),
-            city: document.getElementById('city').value,
+            var data = await res.json();
 
-            tailorId: selectedTailorId,
-            tailorName: selectedTailorName,
-
-            service: "تصميم مخصص",
-            price: "يحدد لاحقا",
-            date: new Date().toLocaleDateString("ar-JO"),
-            status: "قيد المراجعة",
-
-            notes: document.getElementById('notes').value,
-
-            measurements: {
-                chest: document.getElementById('chest').value,
-                waist: document.getElementById('waist').value,
-                hips: document.getElementById('hips').value,
-                shoulder: document.getElementById('shoulder').value,
-                arm: document.getElementById('arm').value,
-                length: document.getElementById('length').value
-            },
-
-            createdAt: new Date().toLocaleString("ar-JO")
-        };
-
-        orders.unshift(newOrder);
-        localStorage.setItem("tailorhubOrders", JSON.stringify(orders));
-
-        successMessage.style.display = "block";
-        successMessage.style.background = "#eaf9ef";
-        successMessage.style.border = "1px solid #b9e7c6";
-        successMessage.style.color = "#23824c";
-        successMessage.innerHTML = "تم إرسال الطلب بنجاح رقم " + id + ". يمكنك تتبعه من لوحة التحكم.";
-
-        customForm.reset();
-
-        // إعادة ضبط الخياط إذا كان مختاراً من الرابط
-        if (paramTailor && tailorNames[paramTailor]) {
-            tailorSelect.value = paramTailor;
+            if (res.ok) {
+                successMessage.style.display = "block";
+                successMessage.style.background = "#eaf9ef";
+                successMessage.style.border = "1px solid #b9e7c6";
+                successMessage.style.color = "#23824c";
+                successMessage.innerHTML = "تم إرسال الطلب بنجاح رقم " + data.order.id + ". يمكنك تتبعه من صفحة تتبع طلبي.";
+                customForm.reset();
+                if (paramTailor) tailorSelect.value = paramTailor;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                alert(data.error || 'حدث خطأ أثناء إرسال الطلب');
+            }
+        } catch (err) {
+            alert('تعذر الاتصال بالخادم');
         }
-        
-        // التمرير لأعلى لرؤية الرسالة
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 </script>
 </body>

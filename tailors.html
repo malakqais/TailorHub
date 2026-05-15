@@ -712,16 +712,50 @@
     <script>function toggleMenu() { var m = document.getElementById('mobileMenu'); if (m) { m.classList.toggle('active') } } function normalizeText(t) { return String(t || '').toLowerCase().replace(/أ|إ|آ/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي').trim() }</script>
     <script>
         var selectedCity = 'الكل';
-        var tailors = JSON.parse(localStorage.getItem("tailorhubTailors") || "[]");
+        var tailorsList = [];
+
+        async function initTailors() {
+            try {
+                var res = await fetch('/api/tailors', { credentials: 'same-origin' });
+                var data = await res.json();
+                tailorsList = data.tailors || [];
+            } catch(e) {}
+            renderTailors();
+            loadParams();
+        }
 
         function renderTailors() {
             var grid = document.getElementById('tailorsGrid');
             grid.innerHTML = '<div class="no-results" id="noResults">لا يوجد خياطين مطابقين</div>';
-            tailors.forEach(function (t) {
-                var avatarHTML = t.avatar ? `<img src="${t.avatar}" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">` : t.letter;
-                grid.innerHTML += `<div class="tailor-card" data-name="${t.name}" data-city="${t.city}" data-service="${t.service}" data-rate="${t.rate}" data-price="${t.price}"><div class="placeholder-img" style="${t.avatar ? 'background:none' : ''}">${avatarHTML}</div><div class="tailor-content"><h3>${t.name}</h3><p>${t.service}</p><div class="tailor-meta"><span>${t.city}</span><span>${t.rate || 0} تقييم</span></div><p class="price">يبدأ من ${t.price || 0} د.أ</p><a href="tailor-profile.html?tailor=${t.id}" class="card-btn">عرض الملف</a></div></div>`
-            })
-        } function checkedServices() { var a = []; document.querySelectorAll('.service-filter').forEach(function (i) { if (i.checked) a.push(normalizeText(i.value)) }); return a } function selectedRate() { var r = 0; document.querySelectorAll('.rate-filter').forEach(function (i) { if (i.checked) r = Number(i.value) }); return r } function filterTailors() { var search = normalizeText(document.getElementById('searchInput').value); var services = checkedServices(); var rate = selectedRate(); var cards = document.querySelectorAll('.tailor-card'); var count = 0; cards.forEach(function (card) { var name = normalizeText(card.dataset.name), city = normalizeText(card.dataset.city), service = normalizeText(card.dataset.service), cr = Number(card.dataset.rate); var okSearch = search === '' || name.includes(search) || city.includes(search) || service.includes(search); var okCity = selectedCity === 'الكل' || city === normalizeText(selectedCity); var okService = services.length === 0 || services.some(function (s) { return service.includes(s) }); var okRate = cr >= rate; if (okSearch && okCity && okService && okRate) { card.style.display = 'block'; count++ } else card.style.display = 'none' }); document.getElementById('noResults').style.display = count === 0 ? 'block' : 'none'; document.getElementById('resultText').innerHTML = 'عدد النتائج الظاهرة: ' + count } function setCityFilter(city, btn) { selectedCity = city; document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); filterTailors() } function clearFilters() { selectedCity = 'الكل'; document.getElementById('searchInput').value = ''; document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); document.querySelector('.filter-btn').classList.add('active'); document.querySelectorAll('.sidebar input').forEach(i => i.checked = false); filterTailors() } function loadParams() { var p = new URLSearchParams(location.search); var s = p.get('search'); var c = p.get('city'); if (s) document.getElementById('searchInput').value = s; if (c) { selectedCity = c; document.querySelectorAll('.filter-btn').forEach(function (b) { b.classList.toggle('active', b.innerText === c) }) } filterTailors() } renderTailors(); loadParams();</script>
+            tailorsList.forEach(function(t) {
+                var avatarHTML = t.avatar ? '<img src="' + t.avatar + '" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">' : (t.letter || t.name.charAt(0));
+                grid.innerHTML += '<div class="tailor-card" data-name="' + t.name + '" data-city="' + t.city + '" data-service="' + t.service + '" data-rate="' + (t.rate || 0) + '" data-price="' + (t.price || 0) + '"><div class="placeholder-img" style="' + (t.avatar ? 'background:none' : '') + '">' + avatarHTML + '</div><div class="tailor-content"><h3>' + t.name + '</h3><p>' + t.service + '</p><div class="tailor-meta"><span>' + t.city + '</span><span>' + (t.rate || 0) + ' تقييم</span></div><p class="price">يبدأ من ' + (t.price || 0) + ' د.أ</p><button onclick="toggleFav(\'' + t.id + '\', this)" class="btn-light" style="margin-left:6px;font-size:12px">♡ مفضلة</button><a href="tailor-profile.html?tailor=' + t.id + '" class="card-btn">عرض الملف</a></div></div>';
+            });
+        }
+
+        async function toggleFav(tailorId, btn) {
+            try {
+                var user = JSON.parse(localStorage.getItem('tailorhubUser'));
+                if (!user) { location.href = 'login.html'; return; }
+                var checkRes = await fetch('/api/favorites/check/' + tailorId, { credentials: 'same-origin' });
+                var checkData = await checkRes.json();
+                if (checkData.isFavorite) {
+                    await fetch('/api/favorites/' + tailorId, { method: 'DELETE', credentials: 'same-origin' });
+                    btn.innerHTML = '♡ مفضلة';
+                } else {
+                    await fetch('/api/favorites/' + tailorId, { method: 'POST', credentials: 'same-origin' });
+                    btn.innerHTML = '♥ محفوظ';
+                }
+            } catch(e) {}
+        }
+
+        function checkedServices() { var a = []; document.querySelectorAll('.service-filter').forEach(function(i) { if (i.checked) a.push(normalizeText(i.value)); }); return a; }
+        function selectedRate() { var r = 0; document.querySelectorAll('.rate-filter').forEach(function(i) { if (i.checked) r = Number(i.value); }); return r; }
+        function filterTailors() { var search = normalizeText(document.getElementById('searchInput').value); var services = checkedServices(); var rate = selectedRate(); var cards = document.querySelectorAll('.tailor-card'); var count = 0; cards.forEach(function(card) { var name = normalizeText(card.dataset.name), city = normalizeText(card.dataset.city), service = normalizeText(card.dataset.service), cr = Number(card.dataset.rate); var okSearch = search === '' || name.includes(search) || city.includes(search) || service.includes(search); var okCity = selectedCity === 'الكل' || city === normalizeText(selectedCity); var okService = services.length === 0 || services.some(function(s) { return service.includes(s); }); var okRate = cr >= rate; if (okSearch && okCity && okService && okRate) { card.style.display = 'block'; count++; } else card.style.display = 'none'; }); document.getElementById('noResults').style.display = count === 0 ? 'block' : 'none'; document.getElementById('resultText').innerHTML = 'عدد النتائج الظاهرة: ' + count; }
+        function setCityFilter(city, btn) { selectedCity = city; document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); }); btn.classList.add('active'); filterTailors(); }
+        function clearFilters() { selectedCity = 'الكل'; document.getElementById('searchInput').value = ''; document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); }); document.querySelector('.filter-btn').classList.add('active'); document.querySelectorAll('.sidebar input').forEach(function(i) { i.checked = false; }); filterTailors(); }
+        function loadParams() { var p = new URLSearchParams(location.search); var s = p.get('search'); var c = p.get('city'); if (s) document.getElementById('searchInput').value = s; if (c) { selectedCity = c; document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.toggle('active', b.innerText === c); }); } filterTailors(); }
+        initTailors();</script>
 </body>
 
 </html>

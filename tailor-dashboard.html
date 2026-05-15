@@ -658,7 +658,8 @@
             }
         };
 
-        function logout() {
+        async function logout() {
+            await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
             localStorage.removeItem('tailorhubUser');
             location.href = 'Home.html';
         }
@@ -669,124 +670,81 @@
         }
     </script>
 <script>
-    // جلب بيانات المستخدم المسجل
     var user = JSON.parse(localStorage.getItem('tailorhubUser'));
-    
-    // إذا لم يكن المستخدم مسجلاً كخياط، وجهه لصفحة الدخول
     if (!user || user.userType !== 'tailor') {
         location.href = 'login.html';
     }
 
-    var currentTailorId = user.email.replace(/[^a-zA-Z0-0]/g, '');
-
-    function renderDashboard() {
-        var allOrders = JSON.parse(localStorage.getItem("tailorhubOrders") || "[]");
-        var tailorOrders = allOrders.filter(function (order) {
-            return order.tailorId === currentTailorId;
-        });
-
-        // حساب الإحصائيات الحقيقية
-        var pendingOrders = tailorOrders.filter(o => o.status !== "مكتمل").length;
-        var totalRevenue = tailorOrders.reduce((sum, o) => sum + (Number(o.price) || 0), 0);
-        
-        // جلب بيانات الخياط من القائمة المخزنة للحصول على التقييم
-        var customTailors = JSON.parse(localStorage.getItem("tailorhubTailors") || "[]");
-        var tailorData = customTailors.find(t => t.email === user.email);
-        var currentRate = tailorData ? (tailorData.rate || 0) : 0;
-
-        // تحديث الواجهة
-        document.getElementById('ordersCount').innerHTML = pendingOrders;
-        document.getElementById('todayCount').innerHTML = tailorOrders.length;
-        document.getElementById('revenue').innerHTML = totalRevenue + " د.أ";
-        
-        // تحديث التقييم (كان 4.8 ثابت)
-        document.querySelector('.stat-card:nth-child(3) h3').innerHTML = currentRate > 0 ? currentRate : "0.0";
-
-        // تعبئة نموذج الملف الشخصي
-        if (tailorData) {
-            document.getElementById('tName').value = tailorData.name || user.fullName;
-            document.getElementById('tCity').value = tailorData.city || user.city;
-            document.getElementById('tService').value = tailorData.service || "";
-            document.getElementById('tPrice').value = tailorData.price || 0;
-            document.getElementById('tBio').value = tailorData.bio || user.bio;
-            
-            // عرض الصورة الشخصية الحالية
-            if (tailorData.avatar) {
-                renderAvatarPreview(tailorData.avatar);
-            }
-
-            // عرض المعرض الحالي
-            renderGalleryPreview(tailorData.gallery || []);
-        }
-
-        ordersBody.innerHTML = "";
-
-        if (tailorOrders.length === 0) {
-            ordersBody.innerHTML = '<tr><td colspan="5">لا يوجد طلبات حالياً</td></tr>';
-            return;
-        }
-
-        tailorOrders.forEach(function (order) {
-            ordersBody.innerHTML += `
-                <tr>
-                    <td>${order.fullName}</td>
-                    <td>${order.service}</td>
-                    <td>${order.date}</td>
-                    <td><span class="status">${order.status}</span></td>
-                    <td>
-                        <button class="action-btn" onclick="completeOrder('${order.id}')">
-                            انهاء
-                        </button>
-                    </td>
-                </tr>
-            `;
-        });
-    }
-
-    function completeOrder(orderId) {
-        var allOrders = JSON.parse(localStorage.getItem("tailorhubOrders") || "[]");
-        for (var i = 0; i < allOrders.length; i++) {
-            if (allOrders[i].id === orderId) {
-                allOrders[i].status = "مكتمل";
-                break;
-            }
-        }
-        localStorage.setItem("tailorhubOrders", JSON.stringify(allOrders));
-        renderDashboard();
-    }
-
+    var currentTailorId = user.email.replace(/[^a-zA-Z0-9]/g, '');
     var uploadedImages = [];
     var uploadedAvatar = null;
 
-    // معالجة الصورة الشخصية
+    async function renderDashboard() {
+        try {
+            var res = await fetch('/api/orders?tailorId=' + encodeURIComponent(currentTailorId), { credentials: 'same-origin' });
+            var data = await res.json();
+            var tailorOrders = data.orders || [];
+
+            var pendingOrders = tailorOrders.filter(function(o) { return o.status !== 'مكتمل'; }).length;
+            var totalRevenue = tailorOrders.reduce(function(sum, o) { return sum + (Number(o.price) || 0); }, 0);
+
+            document.getElementById('ordersCount').innerHTML = pendingOrders;
+            document.getElementById('todayCount').innerHTML = tailorOrders.length;
+            document.getElementById('revenue').innerHTML = totalRevenue + ' د.أ';
+
+            // Load tailor profile
+            var tRes = await fetch('/api/tailors/' + currentTailorId, { credentials: 'same-origin' });
+            if (tRes.ok) {
+                var tData = await tRes.json();
+                var tailorData = tData.tailor;
+                document.querySelector('.stat-card:nth-child(3) h3').innerHTML = tailorData.rate > 0 ? tailorData.rate : '0.0';
+                document.getElementById('tName').value = tailorData.name || user.fullName;
+                document.getElementById('tCity').value = tailorData.city || user.city;
+                document.getElementById('tService').value = tailorData.service || '';
+                document.getElementById('tPrice').value = tailorData.price || 0;
+                document.getElementById('tBio').value = tailorData.bio || '';
+                if (tailorData.avatar) renderAvatarPreview(tailorData.avatar);
+                renderGalleryPreview(tailorData.gallery || []);
+            }
+
+            var ordersBody = document.getElementById('ordersBody');
+            ordersBody.innerHTML = '';
+            if (tailorOrders.length === 0) {
+                ordersBody.innerHTML = '<tr><td colspan="5">لا يوجد طلبات حالياً</td></tr>';
+                return;
+            }
+            tailorOrders.forEach(function(order) {
+                ordersBody.innerHTML += '<tr><td>' + order.fullName + '</td><td>' + order.service + '</td><td>' + order.date + '</td><td><span class="status">' + order.status + '</span></td><td><button class="action-btn" onclick="completeOrder(\'' + order.id + '\')">انهاء</button></td></tr>';
+            });
+        } catch(e) {
+            console.error(e);
+        }
+    }
+
+    async function completeOrder(orderId) {
+        try {
+            await fetch('/api/orders/' + orderId + '/complete', { method: 'PUT', credentials: 'same-origin' });
+            renderDashboard();
+        } catch(e) { alert('حدث خطأ'); }
+    }
+
     document.getElementById('tAvatarPicker').onchange = function(e) {
         var file = e.target.files[0];
         if (!file) return;
         var reader = new FileReader();
-        reader.onload = function(event) {
-            uploadedAvatar = event.target.result;
-            renderAvatarPreview(uploadedAvatar);
-        };
+        reader.onload = function(event) { uploadedAvatar = event.target.result; renderAvatarPreview(uploadedAvatar); };
         reader.readAsDataURL(file);
     };
 
     function renderAvatarPreview(img) {
         uploadedAvatar = img;
-        var preview = document.getElementById('avatarPreview');
-        preview.innerHTML = `<img src="${img}" style="width:100px; height:100px; object-fit:cover; border-radius:15px; border: 1px solid #ddd;">`;
+        document.getElementById('avatarPreview').innerHTML = '<img src="' + img + '" style="width:100px; height:100px; object-fit:cover; border-radius:15px; border: 1px solid #ddd;">';
     }
 
-    // معالجة اختيار الصور وتحويلها لـ base64
     document.getElementById('tFilePicker').onchange = function(e) {
-        var files = e.target.files;
-        if (!files.length) return;
-
-        Array.from(files).forEach(file => {
+        Array.from(e.target.files).forEach(function(file) {
             var reader = new FileReader();
-            reader.onload = function(event) {
-                uploadedImages.push(event.target.result);
-                renderGalleryPreview(uploadedImages);
-            };
+            reader.onload = function(event) { uploadedImages.push(event.target.result); renderGalleryPreview(uploadedImages); };
             reader.readAsDataURL(file);
         });
     };
@@ -794,60 +752,44 @@
     function renderGalleryPreview(imgs) {
         uploadedImages = imgs;
         var preview = document.getElementById('galleryPreview');
-        preview.innerHTML = "";
-        imgs.forEach((img, index) => {
-            preview.innerHTML += `
-                <div style="position:relative; width:80px; height:80px;">
-                    <img src="${img}" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
-                    <span onclick="removeImg(${index})" style="position:absolute; top:-5px; right:-5px; background:red; color:white; border-radius:50%; width:20px; height:20px; text-align:center; cursor:pointer; font-size:12px; line-height:20px;">×</span>
-                </div>
-            `;
+        preview.innerHTML = '';
+        imgs.forEach(function(img, index) {
+            preview.innerHTML += '<div style="position:relative; width:80px; height:80px;"><img src="' + img + '" style="width:100%; height:100%; object-fit:cover; border-radius:8px;"><span onclick="removeImg(' + index + ')" style="position:absolute; top:-5px; right:-5px; background:red; color:white; border-radius:50%; width:20px; height:20px; text-align:center; cursor:pointer; font-size:12px; line-height:20px;">×</span></div>';
         });
     }
 
-    window.removeImg = function(index) {
-        uploadedImages.splice(index, 1);
-        renderGalleryPreview(uploadedImages);
-    };
+    window.removeImg = function(index) { uploadedImages.splice(index, 1); renderGalleryPreview(uploadedImages); };
 
-    document.getElementById('tailorProfileForm').onsubmit = function(e) {
+    document.getElementById('tailorProfileForm').onsubmit = async function(e) {
         e.preventDefault();
-        
-        var customTailors = JSON.parse(localStorage.getItem("tailorhubTailors") || "[]");
-        var index = customTailors.findIndex(t => t.email === user.email);
-        
-        var updatedTailor = {
-            id: currentTailorId,
-            email: user.email,
-            name: document.getElementById('tName').value,
-            city: document.getElementById('tCity').value,
-            service: document.getElementById('tService').value,
-            price: document.getElementById('tPrice').value,
-            bio: document.getElementById('tBio').value,
-            avatar: uploadedAvatar,
-            gallery: uploadedImages,
-            rate: (customTailors[index] && customTailors[index].rate) || 0,
-            letter: document.getElementById('tName').value.charAt(0),
-            services: (customTailors[index] && customTailors[index].services) || [["خدمة عامة", document.getElementById('tPrice').value]]
-        };
-
-        if (index !== -1) {
-            customTailors[index] = updatedTailor;
-        } else {
-            customTailors.push(updatedTailor);
-        }
-        
-        localStorage.setItem("tailorhubTailors", JSON.stringify(customTailors));
-        
-        // تحديث بيانات الجلسة أيضاً
-        user.fullName = updatedTailor.name;
-        user.city = updatedTailor.city;
-        user.bio = updatedTailor.bio;
-        localStorage.setItem("tailorhubUser", JSON.stringify(user));
-
-        document.getElementById('saveMsg').style.display = 'block';
-        setTimeout(() => document.getElementById('saveMsg').style.display = 'none', 3000);
-        renderDashboard();
+        try {
+            var res = await fetch('/api/tailors/' + currentTailorId, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    name: document.getElementById('tName').value,
+                    city: document.getElementById('tCity').value,
+                    service: document.getElementById('tService').value,
+                    price: document.getElementById('tPrice').value,
+                    bio: document.getElementById('tBio').value,
+                    avatar: uploadedAvatar,
+                    gallery: uploadedImages
+                })
+            });
+            var data = await res.json();
+            if (res.ok) {
+                user.fullName = data.tailor.name;
+                user.city = data.tailor.city;
+                user.bio = data.tailor.bio;
+                localStorage.setItem('tailorhubUser', JSON.stringify(user));
+                document.getElementById('saveMsg').style.display = 'block';
+                setTimeout(function() { document.getElementById('saveMsg').style.display = 'none'; }, 3000);
+                renderDashboard();
+            } else {
+                alert(data.error || 'حدث خطأ');
+            }
+        } catch(err) { alert('تعذر الاتصال بالخادم'); }
     };
 
     renderDashboard();

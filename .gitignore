@@ -1,0 +1,5 @@
+node_modules/
+db/tailorhub.db
+cookie.txt
+cookie2.txt
+*.db

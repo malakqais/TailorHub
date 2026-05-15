@@ -522,7 +522,7 @@
             <div class="container">
                 <div class="track-box"><input id="trackInput" onkeyup="renderOrders()"
                         placeholder="ابحثي برقم الطلب مثل TH-123456"><button class="btn-main"
-                        onclick="renderOrders()">بحث</button></div>
+                        onclick="renderOrders()">بحث</button><button class="btn-light" onclick="loadOrders()" style="margin-right:8px">تحديث</button></div>
                 <div class="orders-list" id="ordersList"></div>
             </div>
         </section>
@@ -602,7 +602,47 @@
         };
     </script>
     <script>function toggleMenu() { var m = document.getElementById('mobileMenu'); if (m) { m.classList.toggle('active') } } function normalizeText(t) { return String(t || '').toLowerCase().replace(/أ|إ|آ/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي').trim() }</script>
-    <script>function seed() { var o = JSON.parse(localStorage.getItem('tailorhubOrders') || '[]'); if (o.length === 0) { o = [{ id: 'TH-1042', type: 'custom', fullName: 'ملاك الزعبي', tailorName: 'اتيلية الياسمين', service: 'فستان سهرة مطرز', price: 180, date: '2025-04-12', time: '11:00 AM', status: 'قيد التنفيذ', createdAt: '2025/04/10' }, { id: 'TH-1031', type: 'booking', fullName: 'ملاك الزعبي', tailorName: 'دار يوسف للتفصيل', service: 'بدلة كلاسيكية رمادية', price: 240, date: '2025-04-15', time: '04:00 PM', status: 'جاهز للاستلام', createdAt: '2025/04/09' }]; localStorage.setItem('tailorhubOrders', JSON.stringify(o)) } } function statusSteps(s) { if (s === 'قيد المراجعة') return 1; if (s === 'قيد التنفيذ') return 3; if (s === 'جاهز للاستلام') return 4; if (s === 'تم التسليم' || s === 'مكتمل') return 5; return 2 } function renderOrders() { var q = normalizeText(trackInput.value); var orders = JSON.parse(localStorage.getItem('tailorhubOrders') || '[]'); var box = ordersList; box.innerHTML = ''; var count = 0; orders.forEach(function (o) { if (q && !normalizeText(o.id).includes(q)) return; count++; var n = statusSteps(o.status); box.innerHTML += `<div class="order-card"><div class="order-top"><div><h3>${o.service}</h3><p>رقم الطلب: ${o.id}</p><p>الخياط: ${o.tailorName || 'غير محدد'}</p></div><span class="status">${o.status}</span></div><p>التاريخ: ${o.date} - الوقت: ${o.time}</p><p>السعر: ${o.price} د.أ</p><div class="steps"><div class="step ${n >= 1 ? 'done' : ''}"></div><div class="step ${n >= 2 ? 'done' : ''}"></div><div class="step ${n >= 3 ? 'done' : ''}"></div><div class="step ${n >= 4 ? 'done' : ''}"></div><div class="step ${n >= 5 ? 'done' : ''}"></div></div></div>` }); if (count === 0) box.innerHTML = '<div class="card" style="text-align:center;color:#777">لا يوجد طلب مطابق</div>' } seed(); renderOrders();</script>
+    <script>
+    var allOrders = [];
+
+    function statusSteps(s) {
+        if (s === 'قيد المراجعة') return 1;
+        if (s === 'قيد التنفيذ') return 3;
+        if (s === 'جاهز للاستلام') return 4;
+        if (s === 'تم التسليم' || s === 'مكتمل') return 5;
+        return 2;
+    }
+
+    function renderOrders() {
+        var q = normalizeText(document.getElementById('trackInput').value);
+        var box = document.getElementById('ordersList');
+        box.innerHTML = '';
+        var count = 0;
+        allOrders.forEach(function(o) {
+            if (q && !normalizeText(o.id).includes(q)) return;
+            count++;
+            var n = statusSteps(o.status);
+            box.innerHTML += '<div class="order-card"><div class="order-top"><div><h3>' + o.service + '</h3><p>رقم الطلب: ' + o.id + '</p><p>الخياط: ' + (o.tailorName || 'غير محدد') + '</p></div><span class="status">' + o.status + '</span></div><p>التاريخ: ' + o.date + ' - الوقت: ' + (o.time || '') + '</p><p>السعر: ' + o.price + ' د.أ</p><div class="steps"><div class="step ' + (n >= 1 ? 'done' : '') + '"></div><div class="step ' + (n >= 2 ? 'done' : '') + '"></div><div class="step ' + (n >= 3 ? 'done' : '') + '"></div><div class="step ' + (n >= 4 ? 'done' : '') + '"></div><div class="step ' + (n >= 5 ? 'done' : '') + '"></div></div></div>';
+        });
+        if (count === 0) box.innerHTML = '<div class="card" style="text-align:center;color:#777">لا يوجد طلب مطابق</div>';
+    }
+
+    async function loadOrders() {
+        try {
+            var user = JSON.parse(localStorage.getItem('tailorhubUser'));
+            var url = '/api/orders';
+            if (user && user.email) url += '?userEmail=' + encodeURIComponent(user.email);
+            var res = await fetch(url, { credentials: 'same-origin' });
+            var data = await res.json();
+            allOrders = data.orders || [];
+            renderOrders();
+        } catch(e) {
+            document.getElementById('ordersList').innerHTML = '<div class="card" style="text-align:center;color:#777">لا يوجد طلبات</div>';
+        }
+    }
+
+    loadOrders();
+    </script>
 </body>
 
 </html>

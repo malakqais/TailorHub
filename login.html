@@ -574,23 +574,24 @@
             }
         };
 
-        loginForm.onsubmit = function (e) {
+        loginForm.onsubmit = async function (e) {
             e.preventDefault();
-            
-            var users = JSON.parse(localStorage.getItem("tailorhubUsers") || "[]");
-            var foundUser = users.find(u => u.email === email.value && u.password === password.value);
-            
-            if (foundUser) {
-                // إخفاء رسالة الخطأ إذا كانت ظاهرة
-                document.getElementById('loginError').style.display = 'none';
-                
-                // حفظ الجلسة الحالية
-                localStorage.setItem("tailorhubUser", JSON.stringify(foundUser));
-                
-                // التوجيه حسب نوع الحساب
-                location.href = foundUser.userType === "tailor" ? "tailor-dashboard.html" : "my-account.html";
-            } else {
-                // إظهار رسالة الخطأ
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ email: email.value, password: password.value })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    document.getElementById('loginError').style.display = 'none';
+                    localStorage.setItem('tailorhubUser', JSON.stringify(data.user));
+                    location.href = data.user.userType === 'tailor' ? 'tailor-dashboard.html' : 'my-account.html';
+                } else {
+                    document.getElementById('loginError').style.display = 'block';
+                }
+            } catch (err) {
                 document.getElementById('loginError').style.display = 'block';
             }
         }

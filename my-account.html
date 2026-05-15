@@ -627,14 +627,15 @@
             }
         };
 
-        function logout() {
+        async function logout() {
+            await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
             localStorage.removeItem('tailorhubUser');
             location.href = 'Home.html';
         }
     </script>
     <script>function toggleMenu() { var m = document.getElementById('mobileMenu'); if (m) { m.classList.toggle('active') } } function normalizeText(t) { return String(t || '').toLowerCase().replace(/أ|إ|آ/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي').trim() }</script>
     <script>
-        function loadProfile(user) {
+        async function loadProfile(user) {
             if (user) {
                 fullName.value = user.fullName || '';
                 email.value = user.email || '';
@@ -642,56 +643,58 @@
                 city.value = user.city || '';
                 bio.value = user.bio || '';
                 userNamePreview.innerHTML = user.fullName || 'مستخدم';
-                
-                // تحديث تاريخ الانضمام بشكل ديناميكي
+
                 var joinDate = new Date(user.createdAt || Date.now());
                 var joinYear = joinDate.getFullYear();
-                document.querySelector('.profile-box p').innerHTML = `عميلة منذ ${joinYear}`;
-                
-                // حرف الاسم الأول للأفاتار
+                document.querySelector('.profile-box p').innerHTML = 'عميلة منذ ' + joinYear;
                 document.querySelector('.avatar').innerHTML = user.fullName ? user.fullName.charAt(0) : 'ح';
             }
 
-            var allOrders = JSON.parse(localStorage.getItem('tailorhubOrders') || '[]');
-            var userOrders = allOrders.filter(o => o.userEmail === user.email).slice(0, 4);
-            
-            recentOrders.innerHTML = '';
-            if (userOrders.length === 0) {
+            try {
+                var res = await fetch('/api/orders?userEmail=' + encodeURIComponent(user.email), { credentials: 'same-origin' });
+                var data = await res.json();
+                var userOrders = (data.orders || []).slice(0, 4);
+
+                recentOrders.innerHTML = '';
+                if (userOrders.length === 0) {
+                    recentOrders.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#888;">لا يوجد طلبات سابقة</p>';
+                } else {
+                    userOrders.forEach(function(o) {
+                        recentOrders.innerHTML += '<div class="order-card"><h4>' + o.service + '</h4><p>' + (o.tailorName || 'خياط') + '</p><span class="status">' + o.status + '</span></div>';
+                    });
+                }
+            } catch(e) {
                 recentOrders.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#888;">لا يوجد طلبات سابقة</p>';
-            } else {
-                userOrders.forEach(o => {
-                    recentOrders.innerHTML += `
-                        <div class="order-card">
-                            <h4>${o.service}</h4>
-                            <p>${o.tailorName || 'خياط'}</p>
-                            <span class="status">${o.status}</span>
-                        </div>`;
-                });
             }
         }
 
-        profileForm.onsubmit = function (e) {
+        profileForm.onsubmit = async function (e) {
             e.preventDefault();
-            var user = JSON.parse(localStorage.getItem('tailorhubUser') || '{}');
-            user.fullName = fullName.value;
-            user.email = email.value;
-            user.phone = phone.value;
-            user.city = city.value;
-            user.bio = bio.value;
-
-            localStorage.setItem('tailorhubUser', JSON.stringify(user));
-            
-            // تحديث القائمة الكلية للمستخدمين أيضاً
-            var users = JSON.parse(localStorage.getItem("tailorhubUsers") || "[]");
-            var index = users.findIndex(u => u.email === user.email);
-            if (index !== -1) {
-                users[index] = user;
-                localStorage.setItem("tailorhubUsers", JSON.stringify(users));
+            try {
+                var res = await fetch('/api/users/me', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({
+                        fullName: fullName.value,
+                        email: email.value,
+                        phone: phone.value,
+                        city: city.value,
+                        bio: bio.value
+                    })
+                });
+                var data = await res.json();
+                if (res.ok) {
+                    localStorage.setItem('tailorhubUser', JSON.stringify(data.user));
+                    userNamePreview.innerHTML = fullName.value;
+                    successMessage.style.display = 'block';
+                    setTimeout(function() { successMessage.style.display = 'none'; }, 3000);
+                } else {
+                    alert(data.error || 'حدث خطأ');
+                }
+            } catch(err) {
+                alert('تعذر الاتصال بالخادم');
             }
-
-            userNamePreview.innerHTML = fullName.value;
-            successMessage.style.display = 'block';
-            setTimeout(() => successMessage.style.display = 'none', 3000);
         };
     </script>
 </body>

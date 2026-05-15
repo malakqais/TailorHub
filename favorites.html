@@ -845,34 +845,38 @@
 
         function toggleMenu() { var m = document.getElementById('mobileMenu'); if (m) { m.classList.toggle('active') } } function normalizeText(t) { return String(t || '').toLowerCase().replace(/أ|إ|آ/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي').trim() }</script>
     <script>
-        // جلب الخياطين المسجلين حديثاً
-        var tailorsList = JSON.parse(localStorage.getItem("tailorhubTailors") || "[]");
-        var allTailors = {};
-        tailorsList.forEach(t => {
-            allTailors[t.id] = t;
-        });
-
-        var fav = JSON.parse(localStorage.getItem("favorites") || "[]"); 
-        var grid = document.getElementById('favGrid');
-
-        if (fav.length === 0) { 
-            grid.innerHTML = "<div class='card' style='grid-column: 1/-1; text-align: center;'>لا يوجد خياطون محفوظون بعد</div>";
-        } else {
-            fav.forEach(function (id) { 
-                var t = allTailors[id]; 
-                if (t) {
-                    var avatarHTML = t.avatar ? `<img src="${t.avatar}" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">` : t.letter;
-                    grid.innerHTML += `
-                        <div class="card" style="text-align: center;">
-                            <div class="placeholder-img" style="margin-bottom: 15px; ${t.avatar ? 'background:none' : ''}">${avatarHTML}</div>
-                            <h3>${t.name}</h3>
-                            <p style="color: #666; font-size: 14px;">${t.city}</p>
-                            <p style="color: #d96b4c; font-size: 13px; margin-bottom: 15px;">${t.service}</p>
-                            <a class="btn-light" href="tailor-profile.html?tailor=${id}" style="display: block; width: 100%;">عرض الملف</a>
-                        </div>`;
+        async function loadFavorites() {
+            var grid = document.getElementById('favGrid');
+            try {
+                var res = await fetch('/api/favorites', { credentials: 'same-origin' });
+                if (res.status === 401) {
+                    grid.innerHTML = "<div class='card' style='grid-column: 1/-1; text-align: center;'>يرجى <a href='login.html' style='color:#d96b4c'>تسجيل الدخول</a> لعرض المفضلة</div>";
+                    return;
                 }
-            });
+                var data = await res.json();
+                var tailors = data.tailors || [];
+                if (tailors.length === 0) {
+                    grid.innerHTML = "<div class='card' style='grid-column: 1/-1; text-align: center;'>لا يوجد خياطون محفوظون بعد</div>";
+                } else {
+                    grid.innerHTML = '';
+                    tailors.forEach(function(t) {
+                        var avatarHTML = t.avatar ? '<img src="' + t.avatar + '" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">' : (t.letter || t.name.charAt(0));
+                        grid.innerHTML += '<div class="card" style="text-align: center;"><div class="placeholder-img" style="margin-bottom: 15px; ' + (t.avatar ? 'background:none' : '') + '">' + avatarHTML + '</div><h3>' + t.name + '</h3><p style="color: #666; font-size: 14px;">' + t.city + '</p><p style="color: #d96b4c; font-size: 13px; margin-bottom: 15px;">' + t.service + '</p><button onclick="removeFav(\'' + t.id + '\', this)" style="background:#fff1f1;color:#b12b2b;border:1px solid #ffc2c2;padding:7px 14px;border-radius:10px;cursor:pointer;margin-left:8px;font-size:13px">إزالة</button><a class="btn-light" href="tailor-profile.html?tailor=' + t.id + '" style="display: inline-block; margin-top:8px">عرض الملف</a></div>';
+                    });
+                }
+            } catch(e) {
+                grid.innerHTML = "<div class='card' style='grid-column: 1/-1; text-align: center;'>لا يوجد خياطون محفوظون بعد</div>";
+            }
         }
+
+        async function removeFav(tailorId, btn) {
+            try {
+                await fetch('/api/favorites/' + tailorId, { method: 'DELETE', credentials: 'same-origin' });
+                loadFavorites();
+            } catch(e) {}
+        }
+
+        loadFavorites();
     </script>
 </body>
 

@@ -700,29 +700,29 @@
             }
         }
 
-        document.getElementById("contactForm").onsubmit = function (event) {
+        document.getElementById("contactForm").onsubmit = async function (event) {
             event.preventDefault();
-
-            var messages = JSON.parse(localStorage.getItem("tailorhubMessages") || "[]");
-
-            var newMessage = {
-                name: document.getElementById("fullName").value.trim(),
-                email: document.getElementById("email").value.trim(),
-                message: document.getElementById("message").value.trim(),
-                createdAt: new Date().toLocaleString("ar-JO")
-            };
-
-            messages.unshift(newMessage);
-
-            localStorage.setItem("tailorhubMessages", JSON.stringify(messages));
-
-            document.getElementById("successMessage").style.display = "block";
-
-            document.getElementById("contactForm").reset();
-
-            setTimeout(function () {
-                document.getElementById("successMessage").style.display = "none";
-            }, 4000);
+            try {
+                var res = await fetch('/api/contacts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({
+                        fullName: document.getElementById("fullName").value.trim(),
+                        email: document.getElementById("email").value.trim(),
+                        message: document.getElementById("message").value.trim()
+                    })
+                });
+                if (res.ok) {
+                    document.getElementById("successMessage").style.display = "block";
+                    document.getElementById("contactForm").reset();
+                    setTimeout(function() { document.getElementById("successMessage").style.display = "none"; }, 4000);
+                } else {
+                    alert('حدث خطأ أثناء الإرسال');
+                }
+            } catch(err) {
+                alert('تعذر الاتصال بالخادم');
+            }
         };
     </script>
 

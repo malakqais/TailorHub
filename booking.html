@@ -738,6 +738,26 @@
         yousef: ["دار يوسف للتفصيل", "بدلات رجالية ومناسبات", "د"]
     };
 
+    // Load registered tailors from API and add to dropdown + tailorInfo
+    (async function loadTailors() {
+        try {
+            var res = await fetch('/api/tailors', { credentials: 'same-origin' });
+            var data = await res.json();
+            var select = document.getElementById('tailor');
+            data.tailors.forEach(function(t) {
+                if (!tailorInfo[t.id]) {
+                    tailorInfo[t.id] = [t.name, t.service, t.letter || t.name.charAt(0)];
+                    var opt = document.createElement('option');
+                    opt.value = t.id;
+                    opt.setAttribute('data-price', t.price || 0);
+                    opt.textContent = t.name;
+                    select.appendChild(opt);
+                }
+            });
+            loadTailorParam();
+        } catch(e) { loadTailorParam(); }
+    })();
+
     document.querySelectorAll(".service-card").forEach(function (card) {
         card.onclick = function () {
             document.querySelectorAll(".service-card").forEach(function (c) {
@@ -794,7 +814,7 @@
         }
     }
 
-    bookingForm.onsubmit = function (e) {
+    bookingForm.onsubmit = async function (e) {
         e.preventDefault();
 
         if (
@@ -810,77 +830,54 @@
             return;
         }
 
-        var orders =
-            JSON.parse(localStorage.getItem("tailorhubOrders") || "[]");
+        var selectedTailorId = tailor.value;
+        var selectedTailorName = tailorInfo[selectedTailorId] ? tailorInfo[selectedTailorId][0] : selectedTailorId;
+        var user = JSON.parse(localStorage.getItem('tailorhubUser'));
 
-        var id =
-            "TH-" + Date.now().toString().slice(-6);
+        try {
+            var res = await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    type: 'booking',
+                    userEmail: user ? user.email : 'guest',
+                    fullName: fullName.value.trim(),
+                    phone: phone.value.trim(),
+                    city: city.value,
+                    tailorId: selectedTailorId,
+                    tailorName: selectedTailorName,
+                    service: selectedService,
+                    price: selectedPrice,
+                    date: date.value,
+                    time: selectedTime,
+                    notes: notes.value
+                })
+            });
 
-        var selectedTailorId =
-            tailor.value;
+            var data = await res.json();
 
-        var selectedTailorName =
-            tailorInfo[selectedTailorId][0];
+            if (res.ok) {
+                successMessage.style.display = "block";
+                successMessage.innerHTML = "تم تأكيد الحجز رقم " + data.order.id + " عند " + selectedTailorName + " ويمكنك تتبعه من صفحة تتبع طلبي";
 
-        var data = {
-            id: id,
-            type: "booking",
-
-            fullName: fullName.value.trim(),
-            phone: phone.value.trim(),
-            city: city.value,
-
-            tailorId: selectedTailorId,
-            tailorName: selectedTailorName,
-
-            service: selectedService,
-            price: selectedPrice,
-            date: date.value,
-            time: selectedTime,
-            notes: notes.value,
-
-            status: "قيد المراجعة",
-            createdAt: new Date().toLocaleString("ar-JO")
-        };
-
-        orders.unshift(data);
-
-        localStorage.setItem(
-            "tailorhubOrders",
-            JSON.stringify(orders)
-        );
-
-        successMessage.style.display = "block";
-        successMessage.innerHTML =
-            "تم تأكيد الحجز رقم " + id + " عند " + selectedTailorName + " ويمكنك تتبعه من صفحة تتبع طلبي";
-
-        bookingForm.reset();
-
-        document.querySelectorAll(".service-card").forEach(function (el) {
-            el.classList.remove("active");
-        });
-
-        document.querySelectorAll(".time-slot").forEach(function (el) {
-            el.classList.remove("active");
-        });
-
-        selectedService = "";
-        selectedPrice = 0;
-        selectedTime = "";
-
-        summaryService.innerHTML = "غير محدد";
-        summaryDate.innerHTML = "غير محدد";
-        summaryTime.innerHTML = "غير محدد";
-        summaryPrice.innerHTML = "0 د.أ";
-        summaryTailorName.innerHTML = "غير محدد";
-        summaryTailorService.innerHTML = "اختاري الخياط";
-
-        setTimeout(function () {
-            successMessage.style.display = "none";
-        }, 6000);
+                bookingForm.reset();
+                document.querySelectorAll(".service-card").forEach(function (el) { el.classList.remove("active"); });
+                document.querySelectorAll(".time-slot").forEach(function (el) { el.classList.remove("active"); });
+                selectedService = ""; selectedPrice = 0; selectedTime = "";
+                summaryService.innerHTML = "غير محدد"; summaryDate.innerHTML = "غير محدد";
+                summaryTime.innerHTML = "غير محدد"; summaryPrice.innerHTML = "0 د.أ";
+                summaryTailorName.innerHTML = "غير محدد"; summaryTailorService.innerHTML = "اختاري الخياط";
+                setTimeout(function () { successMessage.style.display = "none"; }, 6000);
+            } else {
+                alert(data.error || 'حدث خطأ أثناء الحجز');
+            }
+        } catch (err) {
+            alert('تعذر الاتصال بالخادم');
+        }
     };
 
-    loadTailorParam();
+    // loadTailorParam is called after tailors load from API above
 </script>
 
 </body>
